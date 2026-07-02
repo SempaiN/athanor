@@ -61,6 +61,7 @@ namespace Athanor.UI
                 card.Buy = Ui.TextButton("Buy", bg.transform, UiTheme.Green, out card.BuyLabel);
                 card.BuyLabel.fontSize = 32;
                 Ui.Anchor((RectTransform)card.Buy.transform, new Vector2(1f, 0.5f), new Vector2(-20, 0), new Vector2(250, 120));
+                card.Buy.gameObject.AddComponent<RepeatButton>(); // mantener = comprar en cadena
                 var def = g;
                 card.Buy.onClick.AddListener(() => game.BuyGenerator(def));
 
@@ -92,11 +93,8 @@ namespace Athanor.UI
 
                 // Se revela cuando ya tenés alguno o tu esencia histórica se acerca al coste
                 bool revealed = owned > 0 || s.LifetimeEssence >= c.Def.BaseCost * 0.4;
-                if (revealed != c.Revealed || c.Revealed == false)
-                {
-                    c.Revealed = revealed;
-                    c.Name.text = revealed ? Loc.T(c.Def.NameKey) : Loc.T("ui_desconocido");
-                }
+                c.Revealed = revealed;
+                c.Name.text = revealed ? Loc.T(c.Def.NameKey) : Loc.T("ui_desconocido");
                 if (!revealed)
                 {
                     c.Owned.text = "";

@@ -72,9 +72,16 @@ namespace Athanor.UI
             game.ElementDiscovered += OnElementDiscovered;
             game.AchievementUnlocked += OnAchievementUnlocked;
             game.Prestiged += OnPrestiged;
+            game.OfflineGranted += ShowOfflinePopup;
             Refresh();
 
             if (game.OfflineGain > 0) ShowOfflinePopup(game.OfflineGain);
+        }
+
+        void Update()
+        {
+            if (lab != null && lab.Root.gameObject.activeSelf)
+                lab.Tick(Time.deltaTime);
         }
 
         void OnDestroy()
@@ -85,6 +92,7 @@ namespace Athanor.UI
                 game.ElementDiscovered -= OnElementDiscovered;
                 game.AchievementUnlocked -= OnAchievementUnlocked;
                 game.Prestiged -= OnPrestiged;
+                game.OfflineGranted -= ShowOfflinePopup;
             }
         }
 
@@ -108,6 +116,7 @@ namespace Athanor.UI
 
             var card = Ui.Panel("OfflineCard", veil.transform, UiTheme.Card);
             Ui.Place(card.rectTransform, 0, 0, 860, 460);
+            StartCoroutine(UiFx.PopIn(card.rectTransform));
 
             var title = Ui.Label("Title", card.transform, Loc.T("ui_offline_titulo"), 46,
                                  UiTheme.Amber, TextAnchor.MiddleCenter, FontStyle.Bold);
@@ -131,21 +140,51 @@ namespace Athanor.UI
                                           UiTheme.ElementColor(def.ColorHex)));
         }
 
+        int toastsAlive;
+
         System.Collections.IEnumerator DiscoveryToast(string message, Color accent)
         {
+            float slotOffset = (toastsAlive % 3) * 112f; // hasta 3 apilados sin taparse
+            toastsAlive++;
             var card = Ui.Panel("Toast", root, UiTheme.Card);
-            Ui.Anchor(card.rectTransform, new Vector2(0.5f, 1f), new Vector2(0, -TopBarH - 40), new Vector2(760, 100));
+            float baseY = -TopBarH - 44 - slotOffset;
+            Ui.Anchor(card.rectTransform, new Vector2(0.5f, 1f), new Vector2(0, baseY), new Vector2(760, 100));
+
+            var stripe = Ui.Panel("Stripe", card.transform, accent, rounded: false);
+            stripe.raycastTarget = false;
+            Ui.Anchor(stripe.rectTransform, new Vector2(0f, 0.5f), new Vector2(0, 0), new Vector2(12, 100));
 
             var dot = Ui.Panel("Dot", card.transform, accent);
             dot.sprite = UiTheme.Circle();
             dot.type = Image.Type.Simple;
-            Ui.Anchor(dot.rectTransform, new Vector2(0f, 0.5f), new Vector2(26, 0), new Vector2(44, 44));
+            Ui.Anchor(dot.rectTransform, new Vector2(0f, 0.5f), new Vector2(30, 0), new Vector2(44, 44));
 
-            var label = Ui.Label("Msg", card.transform, message, 36, UiTheme.TextMain,
+            var label = Ui.Label("Msg", card.transform, message, 34, UiTheme.TextMain,
                                  TextAnchor.MiddleCenter, FontStyle.Bold);
             Ui.Fill(label.rectTransform);
 
-            yield return new WaitForSeconds(2.2f);
+            // Desliza hacia abajo al entrar, se desvanece al salir
+            var cg = card.gameObject.AddComponent<CanvasGroup>();
+            const float inDur = 0.18f;
+            for (float t = 0; t < inDur; t += Time.deltaTime)
+            {
+                float k = t / inDur;
+                card.rectTransform.anchoredPosition = new Vector2(0, baseY + 40 * (1 - k));
+                cg.alpha = k;
+                yield return null;
+            }
+            cg.alpha = 1;
+            card.rectTransform.anchoredPosition = new Vector2(0, baseY);
+
+            yield return new WaitForSeconds(2.0f);
+
+            const float outDur = 0.25f;
+            for (float t = 0; t < outDur; t += Time.deltaTime)
+            {
+                cg.alpha = 1 - t / outDur;
+                yield return null;
+            }
+            toastsAlive--;
             Destroy(card.gameObject);
         }
 
@@ -237,10 +276,18 @@ namespace Athanor.UI
             foreach (var t in tabs)
             {
                 bool active = t.key == key;
+                bool wasActive = t.panel.gameObject.activeSelf;
                 t.panel.gameObject.SetActive(active);
                 t.tabBg.color = active ? UiTheme.Amber : UiTheme.Card;
                 t.tabBg.GetComponentInChildren<Text>().color =
                     active ? UiTheme.Background : UiTheme.TextMain;
+
+                if (active && !wasActive)
+                {
+                    var cg = t.panel.GetComponent<CanvasGroup>();
+                    if (cg == null) cg = t.panel.gameObject.AddComponent<CanvasGroup>();
+                    StartCoroutine(UiFx.FadeIn(cg));
+                }
             }
             Refresh();
         }

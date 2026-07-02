@@ -51,6 +51,7 @@ namespace Athanor.UI
             var img = Panel(name, parent, bg);
             var btn = img.gameObject.AddComponent<Button>();
             btn.targetGraphic = img;
+            img.gameObject.AddComponent<ButtonJuice>();
 
             var colors = btn.colors;
             colors.pressedColor = new Color(0.8f, 0.8f, 0.8f, 1f);

@@ -29,6 +29,22 @@ namespace Athanor.UI
 
         static Sprite roundedRect;
         static Sprite circle;
+        static Sprite verticalGradient;
+
+        /// Degradado vertical sutil (más claro arriba) para el fondo del laboratorio.
+        public static Sprite VerticalGradient()
+        {
+            if (verticalGradient != null) return verticalGradient;
+            const int h = 128;
+            var top = new Color(0.115f, 0.10f, 0.20f);    // violeta profundo más claro
+            var bottom = new Color(0.055f, 0.048f, 0.10f); // casi negro
+            var tex = NewTex(1, h);
+            for (int y = 0; y < h; y++)
+                tex.SetPixel(0, y, Color.Lerp(bottom, top, y / (float)(h - 1)));
+            tex.Apply();
+            verticalGradient = Sprite.Create(tex, new Rect(0, 0, 1, h), new Vector2(0.5f, 0.5f));
+            return verticalGradient;
+        }
 
         /// Rect redondeado 64px, borde 9-slice de 24px: sirve para cualquier panel/botón.
         public static Sprite RoundedRect()

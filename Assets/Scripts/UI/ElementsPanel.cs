@@ -70,6 +70,7 @@ namespace Athanor.UI
                 row.CombineBtn = Ui.TextButton("Combine", bg.transform, UiTheme.Green, out row.CombineLabel);
                 row.CombineLabel.fontSize = 30;
                 Ui.Anchor((RectTransform)row.CombineBtn.transform, new Vector2(1f, 1f), new Vector2(-18, -16), new Vector2(300, 84));
+                row.CombineBtn.gameObject.AddComponent<RepeatButton>(); // mantener = combinar en cadena
                 var rec = recipe;
                 row.CombineBtn.onClick.AddListener(() => game.Combine(rec));
 

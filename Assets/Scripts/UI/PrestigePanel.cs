@@ -58,7 +58,8 @@ namespace Athanor.UI
 
         void OnPrestigeClicked()
         {
-            if (!confirming)
+            // La confirmación solo vale dentro de la ventana de 3 s
+            if (!confirming || Time.unscaledTime > confirmUntil)
             {
                 confirming = true;
                 confirmUntil = Time.unscaledTime + 3f;

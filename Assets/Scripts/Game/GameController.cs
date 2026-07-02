@@ -132,9 +132,27 @@ namespace Athanor.Game
                 .OrderByDescending(r => ElementCatalog.Get(r.Output).Tier)
                 .FirstOrDefault();
 
+        /// Popup de progreso al VOLVER de segundo plano (la app no siempre se reinicia).
+        public event Action<double> OfflineGranted;
+
         void OnApplicationPause(bool paused)
         {
-            if (paused) SaveNow();
+            if (paused)
+            {
+                SaveNow();
+                return;
+            }
+            // Volviendo de background: otorgar lo generado mientras tanto
+            if (State.LastSeenUnixUtc <= 0) return;
+            double away = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - State.LastSeenUnixUtc;
+            if (away < 60) return;
+            double gain = GameRules.OfflineEssence(EssencePerSecond(), away);
+            State.LastSeenUnixUtc = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            if (gain <= 0) return;
+            State.Essence += gain;
+            State.LifetimeEssence += gain;
+            StateChanged?.Invoke();
+            OfflineGranted?.Invoke(gain);
         }
 
         void OnApplicationQuit() => SaveNow();

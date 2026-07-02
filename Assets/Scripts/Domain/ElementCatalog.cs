@@ -64,28 +64,30 @@ namespace Athanor.Domain
             Def(ElementId.PiedraFilosofal, 5, 9_765_625, "#D64550"),
         };
 
+        // Coste de receta decreciente por tier para que la Piedra Filosofal sea alcanzable
+        // en ~1-2 h (GDD §6): 1 PF ≈ 115K unidades base en lugar de ~4M con 10 fijo.
         public static readonly IReadOnlyList<Recipe> Recipes = new List<Recipe>
         {
-            R(ElementId.Barro,   ElementId.Tierra, ElementId.Agua),
-            R(ElementId.Lava,    ElementId.Tierra, ElementId.Fuego),
-            R(ElementId.Polvo,   ElementId.Tierra, ElementId.Aire),
-            R(ElementId.Vapor,   ElementId.Agua,   ElementId.Fuego),
-            R(ElementId.Niebla,  ElementId.Agua,   ElementId.Aire),
-            R(ElementId.Energia, ElementId.Fuego,  ElementId.Aire),
+            R(ElementId.Barro,   ElementId.Tierra, ElementId.Agua,  10),
+            R(ElementId.Lava,    ElementId.Tierra, ElementId.Fuego, 10),
+            R(ElementId.Polvo,   ElementId.Tierra, ElementId.Aire,  10),
+            R(ElementId.Vapor,   ElementId.Agua,   ElementId.Fuego, 10),
+            R(ElementId.Niebla,  ElementId.Agua,   ElementId.Aire,  10),
+            R(ElementId.Energia, ElementId.Fuego,  ElementId.Aire,  10),
 
-            R(ElementId.Piedra,  ElementId.Barro, ElementId.Lava),
-            R(ElementId.Metal,   ElementId.Lava,  ElementId.Polvo),
-            R(ElementId.Cristal, ElementId.Vapor, ElementId.Niebla),
-            R(ElementId.Vida,    ElementId.Barro, ElementId.Energia),
+            R(ElementId.Piedra,  ElementId.Barro, ElementId.Lava,    6),
+            R(ElementId.Metal,   ElementId.Lava,  ElementId.Polvo,   6),
+            R(ElementId.Cristal, ElementId.Vapor, ElementId.Niebla,  6),
+            R(ElementId.Vida,    ElementId.Barro, ElementId.Energia, 6),
 
-            R(ElementId.Sal,      ElementId.Piedra, ElementId.Cristal),
-            R(ElementId.Mercurio, ElementId.Metal,  ElementId.Niebla),
-            R(ElementId.Azufre,   ElementId.Energia, ElementId.Vida),
+            R(ElementId.Sal,      ElementId.Piedra,  ElementId.Cristal, 5),
+            R(ElementId.Mercurio, ElementId.Metal,   ElementId.Niebla,  5),
+            R(ElementId.Azufre,   ElementId.Energia, ElementId.Vida,    5),
 
-            R(ElementId.Oro,  ElementId.Azufre,   ElementId.Mercurio),
-            R(ElementId.Eter, ElementId.Mercurio, ElementId.Sal),
+            R(ElementId.Oro,  ElementId.Azufre,   ElementId.Mercurio, 4),
+            R(ElementId.Eter, ElementId.Mercurio, ElementId.Sal,      4),
 
-            R(ElementId.PiedraFilosofal, ElementId.Oro, ElementId.Eter),
+            R(ElementId.PiedraFilosofal, ElementId.Oro, ElementId.Eter, 3),
         };
 
         static readonly Dictionary<ElementId, ElementDef> byId =
@@ -106,7 +108,7 @@ namespace Athanor.Domain
                 ColorHex = color,
             };
 
-        static Recipe R(ElementId output, ElementId a, ElementId b) =>
-            new Recipe { Output = output, InputA = a, InputB = b };
+        static Recipe R(ElementId output, ElementId a, ElementId b, int units) =>
+            new Recipe { Output = output, InputA = a, InputB = b, UnitsPerInput = units };
     }
 }

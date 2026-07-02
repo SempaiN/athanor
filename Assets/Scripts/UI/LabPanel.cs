@@ -49,13 +49,67 @@ namespace Athanor.UI
             Ui.Fill(fxLayer);
         }
 
+        Image ring;
+        RectTransform liquidRt;
+        float breathePhase;
+        float bubbleTimer;
+
+        /// Animaciones idle; lo llama MainScreen.Update solo cuando esta pestaña está activa.
+        public void Tick(float dt)
+        {
+            breathePhase += dt;
+            // El matraz "respira" y el aro pulsa su brillo suavemente
+            if (flask != null && pulse == null)
+                flask.localScale = Vector3.one * (1f + 0.012f * Mathf.Sin(breathePhase * 1.6f));
+            if (ring != null)
+            {
+                var c = ring.color;
+                c.a = 0.13f + 0.06f * (0.5f + 0.5f * Mathf.Sin(breathePhase * 1.1f));
+                ring.color = c;
+            }
+            if (liquidRt != null)
+                liquidRt.anchoredPosition = new Vector2(0, -55 + 4f * Mathf.Sin(breathePhase * 2.3f));
+
+            bubbleTimer += dt;
+            float every = game.State.HighQualityMode ? 0.9f : 1.6f;
+            if (bubbleTimer >= every)
+            {
+                bubbleTimer = 0;
+                host.StartCoroutine(RisingBubble());
+            }
+        }
+
+        IEnumerator RisingBubble()
+        {
+            var b = Ui.Panel("IdleBubble", flask, new Color(1f, 1f, 1f, 0.0f));
+            b.sprite = UiTheme.Circle();
+            b.type = Image.Type.Simple;
+            b.raycastTarget = false;
+            float x = Random.Range(-70f, 70f);
+            float size = Random.Range(14f, 30f);
+            Ui.Place(b.rectTransform, x, -120, size, size);
+
+            const float duration = 1.6f;
+            for (float t = 0; t < duration; t += Time.deltaTime)
+            {
+                if (b == null) yield break;
+                float k = t / duration;
+                b.rectTransform.anchoredPosition = new Vector2(x + 8f * Mathf.Sin(k * 9f), -120 + 200 * k);
+                float a = k < 0.2f ? k / 0.2f : 1f - (k - 0.2f) / 0.8f;
+                b.color = new Color(1f, 1f, 1f, 0.30f * a);
+                yield return null;
+            }
+            if (b != null) Object.Destroy(b.gameObject);
+        }
+
         void BuildFlask()
         {
-            var ring = Ui.Panel("Ring", Root, new Color(UiTheme.Amber.r, UiTheme.Amber.g, UiTheme.Amber.b, 0.16f));
-            ring.sprite = UiTheme.Circle();
-            ring.type = Image.Type.Simple;
-            ring.raycastTarget = false;
-            Ui.Place(ring.rectTransform, 0, 90, 620, 620);
+            var ringImg = Ui.Panel("Ring", Root, new Color(UiTheme.Amber.r, UiTheme.Amber.g, UiTheme.Amber.b, 0.16f));
+            ringImg.sprite = UiTheme.Circle();
+            ringImg.type = Image.Type.Simple;
+            ringImg.raycastTarget = false;
+            Ui.Place(ringImg.rectTransform, 0, 90, 620, 620);
+            ring = ringImg;
 
             var flaskImg = Ui.Panel("Flask", Root, UiTheme.Amber);
             flaskImg.sprite = UiTheme.Circle();
@@ -74,6 +128,7 @@ namespace Athanor.UI
             liquid.type = Image.Type.Simple;
             liquid.raycastTarget = false;
             Ui.Place(liquid.rectTransform, 0, -55, 275, 275);
+            liquidRt = liquid.rectTransform;
 
             var bubble1 = Ui.Panel("Bubble1", flask, new Color(1f, 1f, 1f, 0.35f));
             bubble1.sprite = UiTheme.Circle();
@@ -158,6 +213,7 @@ namespace Athanor.UI
                 yield return null;
             }
             flask.localScale = Vector3.one;
+            pulse = null; // libera el idle (la respiración del matraz)
         }
 
         IEnumerator FloatingText(string content, Color color)

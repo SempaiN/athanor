@@ -40,8 +40,10 @@ namespace Athanor.Game
             scaler.matchWidthOrHeight = 0.5f;
             canvasGo.AddComponent<GraphicRaycaster>();
 
-            // Fondo del laboratorio (por ahora, color plano; cubre toda la pantalla)
-            var bg = Ui.Panel("Background", canvas.transform, UiTheme.Background, rounded: false);
+            // Fondo del laboratorio: degradado vertical sutil, flat
+            var bg = Ui.Panel("Background", canvas.transform, Color.white, rounded: false);
+            bg.sprite = UiTheme.VerticalGradient();
+            bg.type = Image.Type.Simple;
             bg.raycastTarget = false;
             Ui.Fill(bg.rectTransform);
 

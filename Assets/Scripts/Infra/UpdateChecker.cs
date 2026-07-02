@@ -78,6 +78,7 @@ namespace Athanor.Infra
 
             var card = Ui.Panel("UpdateCard", veil.transform, UiTheme.Card);
             Ui.Place(card.rectTransform, 0, 0, 860, 520);
+            StartCoroutine(UiFx.PopIn(card.rectTransform));
 
             var title = Ui.Label("Title", card.transform, Loc.T("ui_update_titulo"), 52,
                                  UiTheme.Amber, TextAnchor.MiddleCenter, FontStyle.Bold);

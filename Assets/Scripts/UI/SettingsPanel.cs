@@ -71,7 +71,8 @@ namespace Athanor.UI
 
         void OnResetClicked()
         {
-            if (!confirmingReset)
+            // La confirmación solo vale dentro de la ventana de 3 s
+            if (!confirmingReset || Time.unscaledTime > confirmUntil)
             {
                 confirmingReset = true;
                 confirmUntil = Time.unscaledTime + 3f;
