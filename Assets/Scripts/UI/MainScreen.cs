@@ -149,6 +149,20 @@ namespace Athanor.UI
                                           UiTheme.ElementColor(def.ColorHex)));
         }
 
+        System.Collections.IEnumerator PopEssence()
+        {
+            var rt = essenceText.rectTransform;
+            const float duration = 0.18f;
+            for (float t = 0; t < duration; t += Time.deltaTime)
+            {
+                float k = Mathf.Sin(t / duration * Mathf.PI);
+                rt.localScale = Vector3.one * (1f + 0.12f * k);
+                yield return null;
+            }
+            rt.localScale = Vector3.one;
+            essencePop = null;
+        }
+
         int toastsAlive;
 
         System.Collections.IEnumerator DiscoveryToast(string message, Color accent)
@@ -332,10 +346,22 @@ namespace Athanor.UI
 
         // ---- Refresh ----
 
+        double lastEssenceShown;
+        Coroutine essencePop;
+
         void Refresh()
         {
             var s = game.State;
             essenceText.text = NumberFormat.Fmt(s.Essence);
+
+            // "Pop" del contador cuando entra un buen chorro de esencia
+            if (s.Essence > lastEssenceShown &&
+                s.Essence - lastEssenceShown > System.Math.Max(5, lastEssenceShown * 0.02))
+            {
+                if (essencePop != null) StopCoroutine(essencePop);
+                essencePop = StartCoroutine(PopEssence());
+            }
+            lastEssenceShown = s.Essence;
 
             double eps = game.EssencePerSecond();
             essenceCaption.text = eps > 0

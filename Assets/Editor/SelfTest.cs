@@ -162,6 +162,19 @@ namespace Athanor.EditorTools
             Check(Math.Abs(GameRules.GeneratorCost(100, 0) - 100) < 1e-9, "coste base");
             Check(Math.Abs(GameRules.GeneratorCost(100, 2) - 100 * 1.15 * 1.15) < 1e-6, "coste x1.15^n");
 
+            // Compra en lote: suma geométrica == suma manual
+            double manual = 0;
+            for (int k = 0; k < 7; k++) manual += GameRules.GeneratorCost(100, 3 + k);
+            Check(Math.Abs(GameRules.BulkCost(100, 3, 7) - manual) < 1e-6, "bulk = suma manual");
+            Check(GameRules.BulkCost(100, 0, 0) == 0, "bulk 0 = 0");
+
+            // Máx comprable: consistente con el coste
+            double budget = GameRules.BulkCost(100, 5, 12) + 0.01;
+            int max = GameRules.MaxAffordable(100, 5, budget);
+            Check(max == 12, $"max affordable = 12 (dio {max})");
+            Check(GameRules.MaxAffordable(100, 0, 99) == 0, "max = 0 si no alcanza");
+            Check(GameRules.MaxAffordable(100, 0, 100) == 1, "max = 1 justo");
+
             var s = new GameState();
             s.GeneratorsOwned["aprendiz"] = 2; // 0.5/s c/u → 1/s tierra
             GeneratorCatalog.Tick(s, 10, 0);

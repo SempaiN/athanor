@@ -16,7 +16,7 @@ namespace Athanor.UI
         sealed class Row
         {
             public AchievementDef Def;
-            public Image Bg, Medal;
+            public Image Bg, Medal, Stripe;
             public Text Name, Desc, Bonus;
         }
 
@@ -42,6 +42,10 @@ namespace Athanor.UI
                 var row = new Row { Def = def };
                 row.Bg = Ui.Panel("Ach_" + def.Id, content, UiTheme.Card);
                 Ui.Row(row.Bg.rectTransform, i, RowH);
+
+                row.Stripe = Ui.Panel("Stripe", row.Bg.transform, new Color(1, 1, 1, 0.06f), rounded: false);
+                row.Stripe.raycastTarget = false;
+                Ui.Anchor(row.Stripe.rectTransform, new Vector2(0f, 0.5f), new Vector2(0, 0), new Vector2(10, RowH - 10));
 
                 row.Medal = Ui.Panel("Medal", row.Bg.transform, UiTheme.TextDim);
                 row.Medal.sprite = UiTheme.Circle();
@@ -77,6 +81,7 @@ namespace Athanor.UI
                 row.Name.color = unlocked ? UiTheme.TextMain : UiTheme.TextDim;
                 row.Bonus.color = unlocked ? UiTheme.Green : new Color(1, 1, 1, 0.18f);
                 row.Bg.color = unlocked ? UiTheme.Card : new Color(UiTheme.Card.r, UiTheme.Card.g, UiTheme.Card.b, 0.55f);
+                row.Stripe.color = unlocked ? UiTheme.Gold : new Color(1, 1, 1, 0.06f);
             }
         }
     }

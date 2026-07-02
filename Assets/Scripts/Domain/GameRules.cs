@@ -65,6 +65,27 @@ namespace Athanor.Domain
         public static double GeneratorCost(double baseCost, int owned) =>
             baseCost * Math.Pow(GeneratorCostGrowth, owned);
 
+        /// Coste de comprar `count` de una vez (suma geométrica de la curva).
+        public static double BulkCost(double baseCost, int owned, int count)
+        {
+            if (count <= 0) return 0;
+            double g = GeneratorCostGrowth;
+            return baseCost * Math.Pow(g, owned) * (Math.Pow(g, count) - 1) / (g - 1);
+        }
+
+        /// Máxima cantidad comprable con la esencia disponible.
+        public static int MaxAffordable(double baseCost, int owned, double essence)
+        {
+            if (essence < GeneratorCost(baseCost, owned)) return 0;
+            double g = GeneratorCostGrowth;
+            double first = baseCost * Math.Pow(g, owned);
+            int n = (int)Math.Floor(Math.Log(essence * (g - 1) / first + 1, g));
+            n = Math.Min(n, 100_000);
+            while (n > 0 && BulkCost(baseCost, owned, n) > essence) n--;   // corrección numérica
+            while (n < 100_000 && BulkCost(baseCost, owned, n + 1) <= essence) n++;
+            return n;
+        }
+
         // ---- Prestigio: La Gran Obra ----
 
         public static bool CanPrestige(GameState s) =>

@@ -27,6 +27,15 @@ namespace Athanor.UI
         readonly List<Row> rows = new List<Row>();
         const float RowH = 200;
 
+        static Color TierColor(int tier) => tier switch
+        {
+            1 => UiTheme.Hex("#7FA8B8"),
+            2 => UiTheme.Hex("#A8AABC"),
+            3 => UiTheme.Hex("#E3B505"),
+            4 => UiTheme.Hex("#E8C547"),
+            _ => UiTheme.Hex("#D64550"),
+        };
+
         public void Build(RectTransform parent)
         {
             game = GameController.Instance;
@@ -55,6 +64,15 @@ namespace Athanor.UI
                 row.OutDot.sprite = UiTheme.Circle();
                 row.OutDot.type = Image.Type.Simple;
                 Ui.Anchor(row.OutDot.rectTransform, new Vector2(0f, 1f), new Vector2(28, -22), new Vector2(44, 44));
+
+                // Chip de tier (T1..T5) con color propio
+                int tier = ElementCatalog.Get(recipe.Output).Tier;
+                var chip = Ui.Panel("Chip", bg.transform, TierColor(tier));
+                chip.raycastTarget = false;
+                Ui.Anchor(chip.rectTransform, new Vector2(0f, 1f), new Vector2(22, -84), new Vector2(56, 36));
+                var chipText = Ui.Label("T", chip.transform, "T" + tier, 24, UiTheme.Background,
+                                        TextAnchor.MiddleCenter, FontStyle.Bold);
+                Ui.Fill(chipText.rectTransform);
 
                 row.Title = Ui.Label("Title", bg.transform, "", 40, UiTheme.TextMain,
                                      TextAnchor.MiddleLeft, FontStyle.Bold);

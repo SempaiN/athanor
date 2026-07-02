@@ -213,12 +213,15 @@ namespace Athanor.Game
         public double GeneratorCost(GeneratorDef g) =>
             GameRules.GeneratorCost(g.BaseCost, GeneratorOwned(g.Id));
 
-        public bool BuyGenerator(GeneratorDef g)
+        public bool BuyGenerator(GeneratorDef g) => BuyGenerator(g, 1);
+
+        public bool BuyGenerator(GeneratorDef g, int count)
         {
-            double cost = GeneratorCost(g);
+            if (count <= 0) return false;
+            double cost = GameRules.BulkCost(g.BaseCost, GeneratorOwned(g.Id), count);
             if (State.Essence < cost) return false;
             State.Essence -= cost;
-            State.GeneratorsOwned[g.Id] = GeneratorOwned(g.Id) + 1;
+            State.GeneratorsOwned[g.Id] = GeneratorOwned(g.Id) + count;
             AudioManager.Instance?.Buy();
             StateChanged?.Invoke();
             return true;

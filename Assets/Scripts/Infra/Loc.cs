@@ -63,6 +63,9 @@ namespace Athanor.Infra
             { "ui_offline_titulo", "Mientras estabas fuera..." },
             { "ui_offline_texto", "Tus ayudantes generaron el equivalente a:" },
             { "ui_ok", "¡Genial!" },
+            { "ui_comprar_modo", "Cantidad de compra:" },
+            { "ui_max", "Máx" },
+            { "ui_hint_sin_ayudantes", "Transmutá elementos y contratá tu primer ayudante" },
         };
 
         public static string T(string key) =>
