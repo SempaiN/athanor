@@ -1,0 +1,59 @@
+# Build del APK en la nube con game-ci.
+# REQUIERE 3 secretos del repo (ver docs/CI.md): UNITY_LICENSE, UNITY_EMAIL, UNITY_PASSWORD.
+# Se lanza a mano (Actions → Build APK → Run workflow) para no fallar en cada tag
+# mientras los secretos no estén configurados.
+name: Build APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish_release:
+        description: "Publicar como GitHub Release (usa el tag vX.Y.Z del input)"
+        required: false
+        default: ""
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Cache de Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: library-android-${{ hashFiles('Packages/manifest.json') }}
+          restore-keys: library-android-
+
+      - name: Build Unity (Android)
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          unityVersion: 6000.0.78f1
+          targetPlatform: Android
+          androidExportType: androidPackage
+          buildName: athanor
+
+      - name: Renombrar APK
+        run: |
+          mkdir -p out
+          cp build/Android/*.apk out/athanor.apk
+
+      - name: Subir artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: athanor-apk
+          path: out/athanor.apk
+
+      - name: Publicar release (opcional)
+        if: ${{ inputs.publish_release != '' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.publish_release }}
+          files: out/athanor.apk

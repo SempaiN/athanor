@@ -369,6 +369,25 @@ namespace Athanor.Game
 #endif
         }
 
+        // ---- Copia de seguridad ----
+
+        public string ExportSave() => SaveSystem.Export(State);
+
+        /// Importa un guardado exportado (sobrescribe el progreso). False si es inválido.
+        public bool ImportSave(string text)
+        {
+            var imported = SaveSystem.TryImport(text);
+            if (imported == null) return false;
+            State = imported;
+            AchievementBonus = AchievementCatalog.TotalBonus(State);
+            transmuterAcc = 0;
+            OfflineGain = 0;
+            SaveNow();
+            AudioManager.Instance?.ApplySoundSetting();
+            StateChanged?.Invoke();
+            return true;
+        }
+
         /// Borra el progreso por completo (con confirmación en la UI).
         public void ResetSave()
         {

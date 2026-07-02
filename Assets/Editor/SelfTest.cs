@@ -474,6 +474,17 @@ namespace Athanor.EditorTools
             var oldSave = JsonUtility.FromJson<SaveDto>("{\"saveVersion\":1}").ToState();
             Check(Math.Abs(oldSave.MusicVolume - 1f) < 1e-5 && Math.Abs(oldSave.SfxVolume - 1f) < 1e-5,
                   "save viejo: volumen 1 por defecto");
+
+            // Copia de seguridad: exportar → importar reproduce el estado
+            string exported = SaveSystem.Export(s);
+            Check(exported.StartsWith("ATH1."), "export con prefijo");
+            var reimported = SaveSystem.TryImport("  " + exported + "\n");
+            Check(reimported != null && Math.Abs(reimported.Essence - s.Essence) < 1e-9 &&
+                  reimported.GeneratorsOwned["brasero"] == 4, "import reproduce el estado");
+            Check(SaveSystem.TryImport("basura") == null, "import rechaza basura");
+            Check(SaveSystem.TryImport("ATH1.%%%no-base64%%%") == null, "import rechaza base64 corrupto");
+            Check(SaveSystem.TryImport(null) == null && SaveSystem.TryImport("") == null,
+                  "import rechaza vacío");
             Check(back.TotalClicks == 777 && back.PrestigeCount == 2 && back.ClickPowerLevel == 5,
                   "save: contadores");
             Check(Math.Abs(back.PlaySeconds - s.PlaySeconds) < 1e-9, "save: tiempo jugado");

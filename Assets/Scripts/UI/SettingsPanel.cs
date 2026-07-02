@@ -14,10 +14,15 @@ namespace Athanor.UI
         public RectTransform Root { get; private set; }
 
         Text qualityLabel, soundLabel, vibrateLabel, resetLabel, statsText;
+        Text copyLabel, pasteLabel;
         Slider musicSlider, sfxSlider;
         Button resetBtn;
         bool confirmingReset;
         float confirmUntil;
+        string copyFeedback, pasteFeedback;
+        float feedbackUntil;
+        bool confirmingPaste;
+        float pasteConfirmUntil;
 
         public void Build(RectTransform parent)
         {
@@ -70,6 +75,20 @@ namespace Athanor.UI
             vBtn.onClick.AddListener(() => game.ToggleVibrate());
             y -= 124;
 
+            // Copia de seguridad del guardado (portapapeles)
+            AddRowLabel("BkTitle", Loc.T("ui_backup_titulo"), y);
+            var copyBtn = Ui.TextButton("CopySave", Root, UiTheme.Card, out copyLabel);
+            copyLabel.fontSize = 26;
+            copyLabel.color = UiTheme.TextMain;
+            Ui.Anchor((RectTransform)copyBtn.transform, new Vector2(1f, 1f), new Vector2(-40, y + 14), new Vector2(400, 90));
+            copyBtn.onClick.AddListener(OnCopySave);
+            var pasteBtn = Ui.TextButton("PasteSave", Root, UiTheme.Card, out pasteLabel);
+            pasteLabel.fontSize = 26;
+            pasteLabel.color = UiTheme.TextMain;
+            Ui.Anchor((RectTransform)pasteBtn.transform, new Vector2(1f, 1f), new Vector2(-456, y + 14), new Vector2(310, 90));
+            pasteBtn.onClick.AddListener(OnPasteSave);
+            y -= 128;
+
             // Estadísticas de la partida
             AddRowLabel("StatsTitle", Loc.T("ui_stats_titulo"), y);
             statsText = Ui.Label("Stats", Root, "", 27, UiTheme.TextDim, TextAnchor.UpperLeft);
@@ -104,6 +123,31 @@ namespace Athanor.UI
             Ui.Anchor(t.rectTransform, new Vector2(0f, 1f), new Vector2(50, y), new Vector2(460, 50));
         }
 
+        void OnCopySave()
+        {
+            GUIUtility.systemCopyBuffer = game.ExportSave();
+            copyFeedback = Loc.T("ui_copiado");
+            feedbackUntil = Time.unscaledTime + 2.5f;
+            Refresh();
+        }
+
+        void OnPasteSave()
+        {
+            // Sobrescribe el progreso: doble confirmación de 3 s
+            if (!confirmingPaste || Time.unscaledTime > pasteConfirmUntil)
+            {
+                confirmingPaste = true;
+                pasteConfirmUntil = Time.unscaledTime + 3f;
+                Refresh();
+                return;
+            }
+            confirmingPaste = false;
+            bool ok = game.ImportSave(GUIUtility.systemCopyBuffer);
+            pasteFeedback = ok ? Loc.T("ui_cargado") : Loc.T("ui_invalido");
+            feedbackUntil = Time.unscaledTime + 2.5f;
+            Refresh();
+        }
+
         void OnResetClicked()
         {
             // La confirmación solo vale dentro de la ventana de 3 s
@@ -121,6 +165,13 @@ namespace Athanor.UI
         public void Refresh()
         {
             if (confirmingReset && Time.unscaledTime > confirmUntil) confirmingReset = false;
+
+            if (Time.unscaledTime > feedbackUntil) { copyFeedback = null; pasteFeedback = null; }
+            if (confirmingPaste && Time.unscaledTime > pasteConfirmUntil) confirmingPaste = false;
+            copyLabel.text = copyFeedback ?? Loc.T("ui_copiar_save");
+            pasteLabel.text = confirmingPaste
+                ? Loc.T("ui_pegar_confirmar")
+                : (pasteFeedback ?? Loc.T("ui_pegar_save"));
 
             var s = game.State;
             qualityLabel.text = s.HighQualityMode

@@ -139,6 +139,29 @@ namespace Athanor.Infra
 
     public static class SaveSystem
     {
+        const string ExportPrefix = "ATH1.";
+
+        /// Exporta el estado como texto portable (para copia de seguridad por portapapeles).
+        public static string Export(GameState s) =>
+            ExportPrefix + Convert.ToBase64String(
+                System.Text.Encoding.UTF8.GetBytes(JsonUtility.ToJson(SaveDto.From(s))));
+
+        /// Importa un texto exportado. Devuelve null si es inválido.
+        public static GameState TryImport(string text)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(text)) return null;
+                text = text.Trim();
+                if (!text.StartsWith(ExportPrefix)) return null;
+                string json = System.Text.Encoding.UTF8.GetString(
+                    Convert.FromBase64String(text.Substring(ExportPrefix.Length)));
+                var dto = JsonUtility.FromJson<SaveDto>(json);
+                return dto?.ToState();
+            }
+            catch { return null; }
+        }
+
         public static GameState Load(ISaveBackend backend)
         {
             string json = backend.Load();
