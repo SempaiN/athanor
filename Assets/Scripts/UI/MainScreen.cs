@@ -25,8 +25,17 @@ namespace Athanor.UI
         PrestigePanel prestige;
         SettingsPanel settings;
 
-        readonly List<(string key, RectTransform panel, Image tabBg)> tabs =
-            new List<(string, RectTransform, Image)>();
+        sealed class TabEntry
+        {
+            public string Key;
+            public RectTransform Panel;
+            public Image Bg;
+            public Image Icon;
+            public Color IconColor;
+            public Text Label;
+        }
+
+        readonly List<TabEntry> tabs = new List<TabEntry>();
 
         const float TopBarH = 280;
         const float NavH = 150;
@@ -195,6 +204,12 @@ namespace Athanor.UI
             var bar = Ui.Panel("TopBar", root, UiTheme.Panel);
             Ui.Anchor(bar.rectTransform, new Vector2(0.5f, 1f), new Vector2(0, -16), new Vector2(1020, TopBarH));
 
+            // Halo dorado suave detrás del contador principal
+            var glow = Ui.Panel("EssenceGlow", bar.transform,
+                new Color(UiTheme.Gold.r, UiTheme.Gold.g, UiTheme.Gold.b, 0.10f));
+            glow.raycastTarget = false;
+            Ui.Anchor(glow.rectTransform, new Vector2(0.5f, 1f), new Vector2(0, -32), new Vector2(560, 118));
+
             var essenceIcon = Ui.Panel("EssenceIcon", bar.transform, UiTheme.Gold);
             essenceIcon.sprite = UiTheme.Circle();
             essenceIcon.type = Image.Type.Simple;
@@ -248,14 +263,37 @@ namespace Athanor.UI
             var bg = Ui.Panel("Tab_" + key, navBar, UiTheme.Card);
             var btn = bg.gameObject.AddComponent<Button>();
             btn.targetGraphic = bg;
+            bg.gameObject.AddComponent<ButtonJuice>();
             string k = key;
             btn.onClick.AddListener(() => ShowTab(k));
 
-            var label = Ui.Label("Label", bg.transform, Loc.T("ui_tab_" + key), 24,
-                                 UiTheme.TextMain, TextAnchor.MiddleCenter, FontStyle.Bold);
-            Ui.Fill(label.rectTransform);
+            // Iconito de forma+color propio por pestaña (flat, sin fuentes)
+            (Color color, bool diamond) icon = key switch
+            {
+                "lab" => (UiTheme.Amber, false),
+                "ayudantes" => (UiTheme.Green, false),
+                "elementos" => (UiTheme.Hex("#3D9BB3"), true),
+                "logros" => (UiTheme.Gold, false),
+                "obra" => (UiTheme.Violet, true),
+                _ => (UiTheme.TextDim, false),
+            };
+            var iconImg = Ui.Panel("Icon", bg.transform, icon.color);
+            iconImg.sprite = key == "lab" || key == "logros" ? UiTheme.Circle() : UiTheme.RoundedRect();
+            iconImg.type = Image.Type.Simple;
+            iconImg.raycastTarget = false;
+            Ui.Anchor(iconImg.rectTransform, new Vector2(0.5f, 1f), new Vector2(0, -14), new Vector2(30, 30));
+            if (icon.diamond)
+                iconImg.rectTransform.localRotation = Quaternion.Euler(0, 0, 45);
 
-            tabs.Add((key, panel, bg));
+            var label = Ui.Label("Label", bg.transform, Loc.T("ui_tab_" + key), 22,
+                                 UiTheme.TextMain, TextAnchor.MiddleCenter, FontStyle.Bold);
+            Ui.Anchor(label.rectTransform, new Vector2(0.5f, 0f), new Vector2(0, 8), new Vector2(170, 32));
+
+            tabs.Add(new TabEntry
+            {
+                Key = key, Panel = panel, Bg = bg,
+                Icon = iconImg, IconColor = icon.color, Label = label,
+            });
         }
 
         void LayoutTabs(RectTransform nav)
@@ -263,7 +301,7 @@ namespace Athanor.UI
             float w = 1040f / tabs.Count;
             for (int i = 0; i < tabs.Count; i++)
             {
-                var rt = tabs[i].tabBg.rectTransform;
+                var rt = tabs[i].Bg.rectTransform;
                 rt.anchorMin = rt.anchorMax = new Vector2(0f, 0.5f);
                 rt.pivot = new Vector2(0f, 0.5f);
                 rt.anchoredPosition = new Vector2(10 + i * w, 0);
@@ -275,17 +313,17 @@ namespace Athanor.UI
         {
             foreach (var t in tabs)
             {
-                bool active = t.key == key;
-                bool wasActive = t.panel.gameObject.activeSelf;
-                t.panel.gameObject.SetActive(active);
-                t.tabBg.color = active ? UiTheme.Amber : UiTheme.Card;
-                t.tabBg.GetComponentInChildren<Text>().color =
-                    active ? UiTheme.Background : UiTheme.TextMain;
+                bool active = t.Key == key;
+                bool wasActive = t.Panel.gameObject.activeSelf;
+                t.Panel.gameObject.SetActive(active);
+                t.Bg.color = active ? UiTheme.Amber : UiTheme.Card;
+                t.Label.color = active ? UiTheme.Background : UiTheme.TextMain;
+                t.Icon.color = active ? UiTheme.Background : t.IconColor;
 
                 if (active && !wasActive)
                 {
-                    var cg = t.panel.GetComponent<CanvasGroup>();
-                    if (cg == null) cg = t.panel.gameObject.AddComponent<CanvasGroup>();
+                    var cg = t.Panel.GetComponent<CanvasGroup>();
+                    if (cg == null) cg = t.Panel.gameObject.AddComponent<CanvasGroup>();
                     StartCoroutine(UiFx.FadeIn(cg));
                 }
             }

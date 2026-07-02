@@ -87,6 +87,81 @@ namespace Athanor.UI
                 hideFlags = HideFlags.HideAndDontSave,
             };
 
+        // ---- Matraz Erlenmeyer procedural ----
+
+        static Sprite flaskGlass;
+        static Sprite flaskLiquid;
+
+        /// Medio ancho de la silueta del matraz en cada altura (lienzo 512, centro x=256).
+        /// Devuelve <= 0 fuera de la silueta.
+        public static float FlaskHalfWidth(int y)
+        {
+            if (y < 84) return 0;
+            if (y < 122)  // base con esquinas suaves
+            {
+                float k = (y - 84) / 38f;
+                return 186f + 10f * Mathf.Sin(k * Mathf.PI * 0.5f) - 10f * (1f - k) * (1f - k) * 4f;
+            }
+            if (y < 352)  // cuerpo cónico
+                return Mathf.Lerp(192f, 46f, (y - 122) / 230f);
+            if (y < 468)  // cuello
+                return 46f;
+            if (y < 492)  // labio
+                return 60f;
+            return 0;
+        }
+
+        static Texture2D FlaskTex(bool liquidOnly)
+        {
+            const int size = 512;
+            const int liquidTop = 240;
+            var tex = NewTex(size, size);
+            var px = new Color32[size * size];
+
+            for (int y = 0; y < size; y++)
+            {
+                float hw = FlaskHalfWidth(y);
+                for (int x = 0; x < size; x++)
+                {
+                    float a = 0f;
+                    if (hw > 0)
+                    {
+                        float dx = Mathf.Abs(x - 256f);
+                        a = Mathf.Clamp01(hw - dx + 1f);
+                        if (liquidOnly)
+                        {
+                            // el líquido llena el cuerpo hasta liquidTop, con borde suave
+                            float cut = Mathf.Clamp01(liquidTop - y + 1f);
+                            a *= cut;
+                            // margen interior para que se vea el vidrio alrededor
+                            a *= Mathf.Clamp01(hw - dx - 9f + 1f);
+                        }
+                    }
+                    byte alpha = (byte)(a * 255);
+                    px[y * size + x] = new Color32(255, 255, 255, alpha);
+                }
+            }
+            tex.SetPixels32(px);
+            tex.Apply();
+            return tex;
+        }
+
+        /// Silueta completa del matraz (vidrio). Tintable con Image.color.
+        public static Sprite FlaskGlass()
+        {
+            if (flaskGlass != null) return flaskGlass;
+            flaskGlass = Sprite.Create(FlaskTex(false), new Rect(0, 0, 512, 512), new Vector2(0.5f, 0.5f));
+            return flaskGlass;
+        }
+
+        /// Solo el líquido interior (hasta ~mitad del cuerpo). Tintable.
+        public static Sprite FlaskLiquid()
+        {
+            if (flaskLiquid != null) return flaskLiquid;
+            flaskLiquid = Sprite.Create(FlaskTex(true), new Rect(0, 0, 512, 512), new Vector2(0.5f, 0.5f));
+            return flaskLiquid;
+        }
+
         // Alfa antialiased para esquinas redondeadas.
         static float RoundedAlpha(int x, int y, int w, int h, int radius)
         {

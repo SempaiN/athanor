@@ -33,6 +33,16 @@ namespace Athanor.UI
             var woodLight = new Color(0.45f, 0.32f, 0.21f);
             var glass = new Color(0.75f, 0.89f, 0.90f, 0.5f);
 
+            // Piso (siempre): franja inferior más oscura que da profundidad al laboratorio
+            var piso = Prop("Piso");
+            var pisoImg = Ui.Panel("Suelo", piso.transform, new Color(0f, 0f, 0f, 0.28f), rounded: false);
+            pisoImg.raycastTarget = false;
+            Ui.Anchor(pisoImg.rectTransform, new Vector2(0.5f, 0f), new Vector2(0, 0), new Vector2(1400, 200));
+            var zocalo = Ui.Panel("Zocalo", piso.transform,
+                new Color(UiTheme.Amber.r, UiTheme.Amber.g, UiTheme.Amber.b, 0.12f), rounded: false);
+            zocalo.raycastTarget = false;
+            Ui.Anchor(zocalo.rectTransform, new Vector2(0.5f, 0f), new Vector2(0, 200), new Vector2(1400, 5));
+
             // Mesa (siempre visible): franja inferior
             mesa = Prop("Mesa");
             var mesaImg = Ui.Panel("Tabla", mesa.transform, wood, rounded: false);
