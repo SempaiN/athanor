@@ -69,6 +69,9 @@ namespace Athanor.Infra
             { "ui_mejoras_titulo", "— Mejoras del laboratorio —" },
             { "ui_adquirida", "Adquirida" },
             { "ui_hito", "Hito:" },
+            { "ui_vol_musica", "Música" },
+            { "ui_vol_sfx", "Efectos" },
+            { "ui_ajuste_vibracion", "Vibración" },
         };
 
         public static string T(string key) =>

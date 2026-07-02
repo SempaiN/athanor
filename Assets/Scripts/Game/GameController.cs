@@ -60,6 +60,7 @@ namespace Athanor.Game
         void Update()
         {
             double dt = Time.deltaTime;
+            State.PlaySeconds += dt;
             bool producing = TickGenerators(dt);
 
             uiTimer += Time.deltaTime;
@@ -89,6 +90,7 @@ namespace Athanor.Game
             var news = AchievementCatalog.CheckUnlocks(State);
             if (news.Count == 0) return;
             AchievementBonus = AchievementCatalog.TotalBonus(State);
+            Vibrate();
             foreach (var a in news)
             {
                 AudioManager.Instance?.Achievement();
@@ -271,6 +273,7 @@ namespace Athanor.Game
             transmuterAcc = 0;
             SaveNow();
             AudioManager.Instance?.Prestige();
+            Vibrate();
             Prestiged?.Invoke();
             StateChanged?.Invoke();
             return true;
@@ -289,6 +292,31 @@ namespace Athanor.Game
         {
             State.HighQualityMode = !State.HighQualityMode;
             StateChanged?.Invoke();
+        }
+
+        public void SetMusicVolume(float v)
+        {
+            State.MusicVolume = Mathf.Clamp01(v);
+            AudioManager.Instance?.ApplySoundSetting();
+        }
+
+        public void SetSfxVolume(float v)
+        {
+            State.SfxVolume = Mathf.Clamp01(v);
+        }
+
+        public void ToggleVibrate()
+        {
+            State.VibrateOn = !State.VibrateOn;
+            Vibrate(); // muestra cómo se siente al activarlo
+            StateChanged?.Invoke();
+        }
+
+        public void Vibrate()
+        {
+#if UNITY_ANDROID && !UNITY_EDITOR
+            if (State.VibrateOn) Handheld.Vibrate();
+#endif
         }
 
         /// Borra el progreso por completo (con confirmación en la UI).

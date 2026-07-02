@@ -298,6 +298,9 @@ namespace Athanor.EditorTools
                 LastSeenUnixUtc = 1712345678,
                 HighQualityMode = true,
                 SoundOff = true,
+                MusicVolume = 0.4f,
+                SfxVolume = 0.7f,
+                VibrateOn = true,
             };
             s.Add(ElementId.Oro, 12.5);
             s.Add(ElementId.Vapor, 3);
@@ -315,7 +318,13 @@ namespace Athanor.EditorTools
             Check(back.GeneratorsOwned["brasero"] == 4, "save: generadores");
             Check(back.AchievementsUnlocked.Contains("ess_1k"), "save: logros");
             Check(back.UpgradesOwned.Contains("up_guantes"), "save: mejoras");
-            Check(back.HighQualityMode && back.SoundOff, "save: flags");
+            Check(back.HighQualityMode && back.SoundOff && back.VibrateOn, "save: flags");
+            Check(Math.Abs(back.MusicVolume - 0.4f) < 1e-5 && Math.Abs(back.SfxVolume - 0.7f) < 1e-5,
+                  "save: volúmenes");
+            // Un save viejo sin campos de volumen debe cargar con volumen 1
+            var oldSave = JsonUtility.FromJson<SaveDto>("{\"saveVersion\":1}").ToState();
+            Check(Math.Abs(oldSave.MusicVolume - 1f) < 1e-5 && Math.Abs(oldSave.SfxVolume - 1f) < 1e-5,
+                  "save viejo: volumen 1 por defecto");
             Check(back.TotalClicks == 777 && back.PrestigeCount == 2 && back.ClickPowerLevel == 5,
                   "save: contadores");
             Check(back.LastSeenUnixUtc == 1712345678, "save: timestamp");

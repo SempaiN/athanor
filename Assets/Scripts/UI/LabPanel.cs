@@ -233,6 +233,29 @@ namespace Athanor.UI
             floatersAlive--;
         }
 
+        // Pool de partículas: reutiliza las imágenes en vez de crear/destruir por click
+        readonly Stack<Image> particlePool = new Stack<Image>();
+
+        Image GetParticle()
+        {
+            if (particlePool.Count > 0)
+            {
+                var p = particlePool.Pop();
+                p.gameObject.SetActive(true);
+                return p;
+            }
+            var img = Ui.Panel("P", fxLayer, Color.white, rounded: false);
+            img.raycastTarget = false;
+            return img;
+        }
+
+        void ReleaseParticle(Image p)
+        {
+            if (p == null) return;
+            p.gameObject.SetActive(false);
+            particlePool.Push(p);
+        }
+
         IEnumerator ParticleBurst()
         {
             int count = game.State.HighQualityMode ? 10 : 5;
@@ -240,8 +263,8 @@ namespace Athanor.UI
             for (int i = 0; i < count; i++)
             {
                 var def = ElementCatalog.Get(BaseElements[i % BaseElements.Length]);
-                var img = Ui.Panel("P", fxLayer, UiTheme.ElementColor(def.ColorHex), rounded: false);
-                img.raycastTarget = false;
+                var img = GetParticle();
+                img.color = UiTheme.ElementColor(def.ColorHex);
                 float ang = Random.Range(0f, Mathf.PI * 2);
                 Ui.Place(img.rectTransform, 0, 90, 24, 24);
                 parts.Add((img.rectTransform, img, new Vector2(Mathf.Cos(ang), Mathf.Sin(ang))));
@@ -261,7 +284,7 @@ namespace Athanor.UI
                 }
                 yield return null;
             }
-            foreach (var p in parts) Object.Destroy(p.rt.gameObject);
+            foreach (var p in parts) ReleaseParticle(p.img);
         }
     }
 }

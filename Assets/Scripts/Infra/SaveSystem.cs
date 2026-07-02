@@ -47,10 +47,15 @@ namespace Athanor.Infra
         public double quintessence;
         public long totalClicks;
         public int prestigeCount;
+        public double playSeconds;
         public int clickPowerLevel;
         public long lastSeenUnixUtc;
         public bool highQualityMode;
         public bool soundOff;
+        // Volúmenes guardados invertidos: un save viejo sin el campo (0) => volumen 1.
+        public float musicVolMinus;
+        public float sfxVolMinus;
+        public bool vibrateOn;
 
         public List<string> elementIds = new List<string>();
         public List<double> elementAmounts = new List<double>();
@@ -70,10 +75,14 @@ namespace Athanor.Infra
                 quintessence = s.Quintessence,
                 totalClicks = s.TotalClicks,
                 prestigeCount = s.PrestigeCount,
+                playSeconds = s.PlaySeconds,
                 clickPowerLevel = s.ClickPowerLevel,
                 lastSeenUnixUtc = s.LastSeenUnixUtc,
                 highQualityMode = s.HighQualityMode,
                 soundOff = s.SoundOff,
+                musicVolMinus = 1f - s.MusicVolume,
+                sfxVolMinus = 1f - s.SfxVolume,
+                vibrateOn = s.VibrateOn,
             };
             foreach (var kv in s.Balances) { d.elementIds.Add(kv.Key.ToString()); d.elementAmounts.Add(kv.Value); }
             foreach (var e in s.Discovered) d.discovered.Add(e.ToString());
@@ -93,10 +102,14 @@ namespace Athanor.Infra
                 Quintessence = quintessence,
                 TotalClicks = totalClicks,
                 PrestigeCount = prestigeCount,
+                PlaySeconds = playSeconds,
                 ClickPowerLevel = clickPowerLevel,
                 LastSeenUnixUtc = lastSeenUnixUtc,
                 HighQualityMode = highQualityMode,
                 SoundOff = soundOff,
+                MusicVolume = Mathf.Clamp01(1f - musicVolMinus),
+                SfxVolume = Mathf.Clamp01(1f - sfxVolMinus),
+                VibrateOn = vibrateOn,
             };
             for (int i = 0; i < elementIds.Count && i < elementAmounts.Count; i++)
                 if (Enum.TryParse(elementIds[i], out ElementId id))

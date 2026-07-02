@@ -14,6 +14,7 @@ namespace Athanor.Domain
         public double Quintessence;
         public long TotalClicks;
         public int PrestigeCount;
+        public double PlaySeconds;          // tiempo total con la app abierta
 
         public Dictionary<ElementId, double> Balances = new Dictionary<ElementId, double>();
         public HashSet<ElementId> Discovered = new HashSet<ElementId>
@@ -29,6 +30,9 @@ namespace Athanor.Domain
         public long LastSeenUnixUtc;        // para progreso offline
         public bool HighQualityMode;        // false = Alto Rendimiento (default)
         public bool SoundOff;               // invertido para que el default (false) = sonido ON
+        public float MusicVolume = 1f;      // 0..1
+        public float SfxVolume = 1f;        // 0..1
+        public bool VibrateOn;              // háptica en logros/prestigio (default off)
 
         public double BalanceOf(ElementId id) =>
             Balances.TryGetValue(id, out var v) ? v : 0;

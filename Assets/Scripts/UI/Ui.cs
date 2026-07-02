@@ -115,6 +115,49 @@ namespace Athanor.UI
             return content;
         }
 
+        /// Slider horizontal flat (barra + relleno ámbar + manija circular).
+        public static Slider HSlider(string name, Transform parent, out Slider slider)
+        {
+            var root = Rect(name, parent);
+
+            var bg = Panel("Bg", root, new Color(1, 1, 1, 0.08f));
+            bg.raycastTarget = true;
+            Fill(bg.rectTransform);
+
+            var fillArea = Rect("FillArea", root);
+            fillArea.anchorMin = new Vector2(0, 0.5f);
+            fillArea.anchorMax = new Vector2(1, 0.5f);
+            fillArea.offsetMin = new Vector2(10, -8);
+            fillArea.offsetMax = new Vector2(-10, 8);
+
+            var fill = Panel("Fill", fillArea, UiTheme.Amber);
+            fill.raycastTarget = false;
+            fill.rectTransform.anchorMin = Vector2.zero;
+            fill.rectTransform.anchorMax = new Vector2(0, 1);
+            fill.rectTransform.offsetMin = Vector2.zero;
+            fill.rectTransform.offsetMax = Vector2.zero;
+
+            var handleArea = Rect("HandleArea", root);
+            handleArea.anchorMin = new Vector2(0, 0.5f);
+            handleArea.anchorMax = new Vector2(1, 0.5f);
+            handleArea.offsetMin = new Vector2(22, 0);
+            handleArea.offsetMax = new Vector2(-22, 0);
+
+            var handle = Panel("Handle", handleArea, UiTheme.TextMain);
+            handle.sprite = UiTheme.Circle();
+            handle.type = Image.Type.Simple;
+            handle.rectTransform.sizeDelta = new Vector2(44, 44);
+
+            slider = root.gameObject.AddComponent<Slider>();
+            slider.fillRect = fill.rectTransform;
+            slider.handleRect = handle.rectTransform;
+            slider.targetGraphic = handle;
+            slider.direction = Slider.Direction.LeftToRight;
+            slider.minValue = 0f;
+            slider.maxValue = 1f;
+            return slider;
+        }
+
         /// Fila dentro de un ScrollList: ocupa el ancho, alto fijo, apilada desde arriba.
         public static void Row(RectTransform rt, int index, float rowHeight, float margin = 10)
         {
