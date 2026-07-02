@@ -26,7 +26,8 @@ namespace Athanor.Game
             Instance = this;
             backend = new JsonFileSaveBackend();
             State = SaveSystem.Load(backend);
-            Application.targetFrameRate = State.HighQualityMode ? 60 : 30;
+            // 60 fps siempre; el modo rendimiento reduce partículas, no fluidez.
+            Application.targetFrameRate = 60;
         }
 
         void Update()

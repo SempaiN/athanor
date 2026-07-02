@@ -39,13 +39,21 @@ namespace Athanor.Game
             scaler.matchWidthOrHeight = 0.5f;
             canvasGo.AddComponent<GraphicRaycaster>();
 
-            // Fondo del laboratorio (por ahora, color plano)
+            // Fondo del laboratorio (por ahora, color plano; cubre toda la pantalla)
             var bg = Ui.Panel("Background", canvas.transform, UiTheme.Background, rounded: false);
             bg.raycastTarget = false;
             Ui.Fill(bg.rectTransform);
 
+            // Contenedor ajustado al área segura (notch, barra de gestos)
+            var safeRoot = Ui.Rect("SafeArea", canvas.transform);
+            Ui.Fill(safeRoot);
+            safeRoot.gameObject.AddComponent<SafeAreaFitter>();
+
             // Pantalla principal
-            canvasGo.AddComponent<MainScreen>().Build(canvas);
+            canvasGo.AddComponent<MainScreen>().Build(safeRoot);
+
+            // Aviso de nueva versión (GitHub Releases) — quitar si se publica en una store
+            canvasGo.AddComponent<Athanor.Infra.UpdateChecker>().Init(safeRoot);
         }
     }
 }

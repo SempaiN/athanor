@@ -26,6 +26,10 @@ namespace Athanor.Infra
             { "ui_poder_click", "Poder de click" },
             { "ui_nivel", "Nv." },
             { "ui_coste", "Coste" },
+            { "ui_update_titulo", "Actualización disponible" },
+            { "ui_update_texto", "Hay una versión nueva del juego:" },
+            { "ui_update_descargar", "Descargar" },
+            { "ui_update_luego", "Más tarde" },
         };
 
         public static string T(string key) =>
