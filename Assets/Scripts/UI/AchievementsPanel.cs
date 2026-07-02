@@ -48,7 +48,7 @@ namespace Athanor.UI
                 Ui.Anchor(row.Stripe.rectTransform, new Vector2(0f, 0.5f), new Vector2(0, 0), new Vector2(10, RowH - 10));
 
                 row.Medal = Ui.Panel("Medal", row.Bg.transform, UiTheme.TextDim);
-                row.Medal.sprite = ProceduralIcons.Star();
+                row.Medal.sprite = ProceduralIcons.Medal(out _);
                 row.Medal.type = Image.Type.Simple;
                 Ui.Anchor(row.Medal.rectTransform, new Vector2(0f, 0.5f), new Vector2(26, 0), new Vector2(68, 68));
 
@@ -77,7 +77,10 @@ namespace Athanor.UI
             foreach (var row in rows)
             {
                 bool unlocked = s.AchievementsUnlocked.Contains(row.Def.Id);
-                row.Medal.color = unlocked ? UiTheme.Gold : new Color(1, 1, 1, 0.10f);
+                ProceduralIcons.Medal(out bool medalBaked);
+                row.Medal.color = unlocked
+                    ? (medalBaked ? Color.white : UiTheme.Gold)
+                    : new Color(1, 1, 1, 0.10f);
                 row.Name.color = unlocked ? UiTheme.TextMain : UiTheme.TextDim;
                 row.Bonus.color = unlocked ? UiTheme.Green : new Color(1, 1, 1, 0.18f);
                 row.Bg.color = unlocked ? UiTheme.Card : new Color(UiTheme.Card.r, UiTheme.Card.g, UiTheme.Card.b, 0.55f);

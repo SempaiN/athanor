@@ -255,7 +255,8 @@ namespace Athanor.UI
                 var def = ElementCatalog.Get(el);
                 float cx = -520 + slot * (i + 0.5f);
 
-                var dot = Ui.Panel("Dot_" + el, bar.transform, UiTheme.ElementColor(def.ColorHex));
+                var dot = Ui.Panel("Dot_" + el, bar.transform,
+                    ProceduralIcons.TintFor(el, UiTheme.ElementColor(def.ColorHex)));
                 dot.sprite = ProceduralIcons.For(el);
                 dot.type = Image.Type.Simple;
                 Ui.Anchor(dot.rectTransform, new Vector2(0.5f, 0f), new Vector2(cx, 88), new Vector2(46, 46));

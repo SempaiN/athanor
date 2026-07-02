@@ -68,7 +68,8 @@ namespace Athanor.UI
 
                 // Icono: el elemento que produce (o rombo arcano para el Transmutador)
                 var icon = Ui.Panel("Icon", bg.transform, g.Produces.Length > 0
-                    ? UiTheme.ElementColor(ElementCatalog.Get(g.Produces[0]).ColorHex)
+                    ? ProceduralIcons.TintFor(g.Produces[0],
+                        UiTheme.ElementColor(ElementCatalog.Get(g.Produces[0]).ColorHex))
                     : UiTheme.Violet);
                 icon.sprite = g.Produces.Length > 0 ? ProceduralIcons.For(g.Produces[0]) : ProceduralIcons.Diamond();
                 icon.type = Image.Type.Simple;

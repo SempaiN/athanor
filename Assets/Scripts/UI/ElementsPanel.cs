@@ -150,7 +150,7 @@ namespace Athanor.UI
                 }
 
                 double owned = s.BalanceOf(r.Output);
-                row.OutDot.color = UiTheme.ElementColor(outDef.ColorHex);
+                row.OutDot.color = ProceduralIcons.TintFor(r.Output, UiTheme.ElementColor(outDef.ColorHex));
                 row.Title.text = Loc.T(outDef.NameKey);
                 row.OwnedText.color = UiTheme.Amber;
                 row.OwnedText.text = "x" + NumberFormat.Fmt(owned) +

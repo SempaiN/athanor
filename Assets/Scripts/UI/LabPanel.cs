@@ -144,8 +144,11 @@ namespace Athanor.UI
             Ui.Place(flaskRoot, 0, 90, 520, 520);
             flask = flaskRoot;
 
-            var liquid = Ui.Panel("Liquid", flask, UiTheme.Violet, rounded: false);
-            liquid.sprite = UiTheme.FlaskLiquid();
+            // PNG horneado si existe; forma procedural tintada si no
+            var likedLiquid = Resources.Load<Sprite>("Art/Core/matraz_liquido");
+            var liquid = Ui.Panel("Liquid", flask,
+                likedLiquid != null ? Color.white : UiTheme.Violet, rounded: false);
+            liquid.sprite = likedLiquid != null ? likedLiquid : UiTheme.FlaskLiquid();
             liquid.type = Image.Type.Simple;
             liquid.raycastTarget = false;
             Ui.Fill(liquid.rectTransform);
@@ -158,9 +161,11 @@ namespace Athanor.UI
             surface.raycastTarget = false;
             Ui.Place(surface.rectTransform, 0, -14, 168, 22);
 
-            // Vidrio más claro y limpio (menos "marrón" sobre el fondo oscuro)
-            var glass = Ui.Panel("Glass", flask, new Color(0.97f, 0.78f, 0.45f, 0.52f), rounded: false);
-            glass.sprite = UiTheme.FlaskGlass();
+            // Vidrio: PNG horneado (con contorno y gradiente) o procedural claro
+            var bakedGlass = Resources.Load<Sprite>("Art/Core/matraz_vidrio");
+            var glass = Ui.Panel("Glass", flask,
+                bakedGlass != null ? Color.white : new Color(0.97f, 0.78f, 0.45f, 0.52f), rounded: false);
+            glass.sprite = bakedGlass != null ? bakedGlass : UiTheme.FlaskGlass();
             glass.type = Image.Type.Simple;
             Ui.Fill(glass.rectTransform);
 
@@ -308,7 +313,7 @@ namespace Athanor.UI
                 var def = ElementCatalog.Get(el);
                 var img = GetParticle();
                 img.sprite = ProceduralIcons.For(el); // mini icono del elemento
-                img.color = UiTheme.ElementColor(def.ColorHex);
+                img.color = ProceduralIcons.TintFor(el, UiTheme.ElementColor(def.ColorHex));
                 float ang = Random.Range(0f, Mathf.PI * 2);
                 Ui.Place(img.rectTransform, 0, 90, 34, 34);
                 img.rectTransform.localRotation = Quaternion.Euler(0, 0, Random.Range(-25f, 25f));

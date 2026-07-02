@@ -139,8 +139,9 @@ namespace Athanor.UI
             for (int i = 0; i < flaskColors.Length; i++)
             {
                 // Frascos con siluetas variadas (gota, hoja, llama) en vez de bolitas
-                var fl = Ui.Panel("Frasco" + i, parent, flaskColors[i]);
-                fl.sprite = ProceduralIcons.For(ShelfShapes[i % ShelfShapes.Length]);
+                var shape = ShelfShapes[i % ShelfShapes.Length];
+                var fl = Ui.Panel("Frasco" + i, parent, ProceduralIcons.TintFor(shape, flaskColors[i]));
+                fl.sprite = ProceduralIcons.For(shape);
                 fl.type = Image.Type.Simple;
                 fl.raycastTarget = false;
                 Ui.Place(fl.rectTransform, x - 60 + i * 60, y + 36, 46, 46);

@@ -10,21 +10,63 @@ namespace Athanor.UI
     public static class ProceduralIcons
     {
         const int Size = 128;
-        static readonly Dictionary<ElementId, Sprite> cache = new Dictionary<ElementId, Sprite>();
+        static readonly Dictionary<ElementId, (Sprite sprite, bool baked)> cache =
+            new Dictionary<ElementId, (Sprite, bool)>();
         static Sprite star, diamond;
+        static Sprite medal;
+        static bool medalBaked, medalChecked;
 
-        public static Sprite For(ElementId id)
+        public static Sprite For(ElementId id) => For(id, out _);
+
+        /// Devuelve el icono del elemento. `baked` = viene de un PNG en Resources
+        /// (ya coloreado: usar tinte blanco); si no, es la forma procedural tintable.
+        public static Sprite For(ElementId id, out bool baked)
         {
-            if (cache.TryGetValue(id, out var s)) return s;
-            s = Render(id.ToString(), SdfFor(id));
-            cache[id] = s;
+            if (cache.TryGetValue(id, out var hit))
+            {
+                baked = hit.baked;
+                return hit.sprite;
+            }
+            var fromFile = Resources.Load<Sprite>("Art/Elements/el_" + id.ToString().ToLowerInvariant());
+            baked = fromFile != null;
+            var s = baked ? fromFile : Render(id.ToString(), SdfFor(id));
+            cache[id] = (s, baked);
             return s;
         }
 
-        /// Estrella de 5 puntas (medallas de logros).
-        public static Sprite Star()
+        /// Tinte correcto según el origen del icono: blanco si es PNG coloreado.
+        public static Color TintFor(ElementId id, Color proceduralTint)
         {
-            if (star != null) return star;
+            For(id, out bool baked);
+            return baked ? Color.white : proceduralTint;
+        }
+
+        /// Medalla de logros: PNG si existe, estrella procedural si no.
+        public static Sprite Medal(out bool baked)
+        {
+            if (!medalChecked)
+            {
+                medalChecked = true;
+                var fromFile = Resources.Load<Sprite>("Art/Achievements/medalla");
+                medalBaked = fromFile != null;
+                medal = medalBaked ? fromFile : Star();
+            }
+            baked = medalBaked;
+            return medal;
+        }
+
+        /// SDF de un elemento (para el horneado de PNGs en el editor).
+        public static Func<Vector2, float> SdfOf(ElementId id) => SdfFor(id);
+
+        /// SDF de la estrella de 5 puntas.
+        public static Func<Vector2, float> StarSdf()
+        {
+            var pts = StarPoints();
+            return p => Poly(p, pts);
+        }
+
+        static Vector2[] StarPoints()
+        {
             var pts = new Vector2[10];
             for (int i = 0; i < 10; i++)
             {
@@ -32,7 +74,14 @@ namespace Athanor.UI
                 float r = i % 2 == 0 ? 0.82f : 0.36f;
                 pts[i] = new Vector2(Mathf.Cos(ang), Mathf.Sin(ang)) * r;
             }
-            star = Render("star", p => Poly(p, pts));
+            return pts;
+        }
+
+        /// Estrella de 5 puntas (fallback procedural de la medalla).
+        public static Sprite Star()
+        {
+            if (star != null) return star;
+            star = Render("star", StarSdf());
             return star;
         }
 
