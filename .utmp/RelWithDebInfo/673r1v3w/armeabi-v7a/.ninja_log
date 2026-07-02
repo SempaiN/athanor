@@ -1,0 +1,12 @@
+# ninja log v5
+140	624	8046961223057083	FramePacing/CMakeFiles/swappywrapper.dir/UnitySwappyWrapper.cpp.o	5d8d38ad5bda980c
+626	970	8046961226391758	C:/Users/troll/Desktop/alquimia-clicker/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/673r1v3w/obj/armeabi-v7a/libswappywrapper.so	9c6cd7979cf6ccc6
+62	2743	8046961244089533	GameActivity/CMakeFiles/game.dir/UGAInputMotionEvent.cpp.o	c97ab178afe0ad3b
+105	3094	8046961247702935	GameActivity/CMakeFiles/game.dir/UGASoftKeyboard.cpp.o	f40abd5182df812f
+1	3122	8046961247906967	GameActivity/CMakeFiles/game.dir/UGAConfiguration.cpp.o	d85a88ea5d4372b4
+81	3191	8046961248605040	GameActivity/CMakeFiles/game.dir/UGAInputKeyEvent.cpp.o	6dda8c4309beb7f2
+46	3221	8046961248965884	GameActivity/CMakeFiles/game.dir/UGAEntry.cpp.o	7965ccb96f4171f8
+22	3237	8046961249121615	GameActivity/CMakeFiles/game.dir/UGADebug.cpp.o	df58af7f2796bd6f
+34	3267	8046961249414549	GameActivity/CMakeFiles/game.dir/UGAInput.cpp.o	a62e2b0a50018e41
+13	3542	8046961252122751	GameActivity/CMakeFiles/game.dir/UGAApplication.cpp.o	1a1703226ba15577
+3543	3744	8046961254141322	C:/Users/troll/Desktop/alquimia-clicker/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/673r1v3w/obj/armeabi-v7a/libgame.so	d584fd7e05b4f506
