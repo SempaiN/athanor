@@ -75,6 +75,9 @@ namespace Athanor.EditorTools
             PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Android, PackageId);
             PlayerSettings.Android.bundleVersionCode = Athanor.GameVersion.VersionCode;
 
+            EnsureAppIcon();
+            PlayerSettings.SplashScreen.backgroundColor = new Color(0.078f, 0.071f, 0.122f); // #14121F
+
             PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
             PlayerSettings.Android.minSdkVersion = (AndroidSdkVersions)23;
 
@@ -85,6 +88,79 @@ namespace Athanor.EditorTools
             EditorUserBuildSettings.buildAppBundle = false; // APK para sideload/releases
 
             AssetDatabase.SaveAssets();
+        }
+
+        const string IconPath = "Assets/Icon/app_icon.png";
+
+        /// Genera el ícono de la app (matraz sobre fondo oscuro con aro ámbar) si no existe,
+        /// y lo asigna como ícono por defecto. Reemplazable poniendo otro PNG en la misma ruta.
+        static void EnsureAppIcon()
+        {
+            if (!File.Exists(IconPath))
+            {
+                Directory.CreateDirectory("Assets/Icon");
+                File.WriteAllBytes(IconPath, DrawIconPng());
+                AssetDatabase.ImportAsset(IconPath);
+            }
+            var tex = AssetDatabase.LoadAssetAtPath<Texture2D>(IconPath);
+            if (tex != null)
+                PlayerSettings.SetIcons(NamedBuildTarget.Unknown, new[] { tex }, IconKind.Any);
+        }
+
+        static byte[] DrawIconPng()
+        {
+            const int size = 512;
+            var bg = new Color(0.133f, 0.118f, 0.20f);      // #221E33
+            var amber = new Color(0.949f, 0.647f, 0.255f);  // #F2A541
+            var violet = new Color(0.608f, 0.447f, 0.812f); // #9B72CF
+
+            var tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+            var px = new Color[size * size];
+
+            const float cx = 256f, cy = 256f;
+            const float corner = 90f;                        // esquinas redondeadas del fondo
+            const float ringR = 208f, ringW = 9f;            // aro exterior
+            const float flaskScale = 0.72f, flaskCy = 236f;  // matraz centrado abajo
+
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    // Fondo con esquinas redondeadas
+                    float ex = Mathf.Max(Mathf.Abs(x - cx) - (256 - corner), 0);
+                    float ey = Mathf.Max(Mathf.Abs(y - cy) - (256 - corner), 0);
+                    float cornerDist = Mathf.Sqrt(ex * ex + ey * ey);
+                    float bgA = Mathf.Clamp01(corner - cornerDist + 1);
+                    var c = new Color(bg.r, bg.g, bg.b, bgA);
+
+                    // Aro ámbar
+                    float d = Mathf.Sqrt((x - cx) * (x - cx) + (y - cy) * (y - cy));
+                    float ringA = Mathf.Clamp01(ringW - Mathf.Abs(d - ringR) + 1) * 0.85f;
+                    if (ringA > 0) c = Color.Lerp(c, amber, ringA * bgA);
+
+                    // Matraz (reutiliza la silueta del juego, escalada)
+                    float srcY = (y - flaskCy) / flaskScale + 256f;
+                    if (srcY >= 0 && srcY < 512)
+                    {
+                        float hw = Athanor.UI.UiTheme.FlaskHalfWidth((int)srcY) * flaskScale;
+                        float dx = Mathf.Abs(x - cx);
+                        float fa = Mathf.Clamp01(hw - dx + 1);
+                        if (fa > 0)
+                        {
+                            var flaskColor = srcY < 240 ? violet : amber;
+                            c = Color.Lerp(c, flaskColor, fa * bgA);
+                        }
+                    }
+
+                    px[y * size + x] = c;
+                }
+            }
+
+            tex.SetPixels(px);
+            tex.Apply();
+            byte[] png = tex.EncodeToPNG();
+            UnityEngine.Object.DestroyImmediate(tex);
+            return png;
         }
 
         static void EnsureScene()

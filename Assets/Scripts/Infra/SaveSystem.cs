@@ -49,6 +49,7 @@ namespace Athanor.Infra
         public int prestigeCount;
         public double playSeconds;
         public int clickPowerLevel;
+        public int missionIndex;
         public long lastSeenUnixUtc;
         public bool highQualityMode;
         public bool soundOff;
@@ -77,6 +78,7 @@ namespace Athanor.Infra
                 prestigeCount = s.PrestigeCount,
                 playSeconds = s.PlaySeconds,
                 clickPowerLevel = s.ClickPowerLevel,
+                missionIndex = s.MissionIndex,
                 lastSeenUnixUtc = s.LastSeenUnixUtc,
                 highQualityMode = s.HighQualityMode,
                 soundOff = s.SoundOff,
@@ -104,6 +106,7 @@ namespace Athanor.Infra
                 PrestigeCount = prestigeCount,
                 PlaySeconds = playSeconds,
                 ClickPowerLevel = clickPowerLevel,
+                MissionIndex = missionIndex,
                 LastSeenUnixUtc = lastSeenUnixUtc,
                 HighQualityMode = highQualityMode,
                 SoundOff = soundOff,

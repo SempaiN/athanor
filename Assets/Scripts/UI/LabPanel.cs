@@ -32,6 +32,8 @@ namespace Athanor.UI
         public LabPanel(MonoBehaviour host) { this.host = host; }
 
         LabDecor decor;
+        GameObject missionCard;
+        Text missionText, missionReward;
 
         public void Build(RectTransform parent)
         {
@@ -41,12 +43,33 @@ namespace Athanor.UI
 
             BuildFlask();
             BuildButtons();
+            BuildMissionBanner();
 
             decor = new LabDecor();
             decor.Build(Root);
 
             fxLayer = Ui.Rect("FxLayer", Root);
             Ui.Fill(fxLayer);
+        }
+
+        void BuildMissionBanner()
+        {
+            var card = Ui.Panel("Mission", Root, UiTheme.Card);
+            Ui.Anchor(card.rectTransform, new Vector2(0.5f, 1f), new Vector2(0, -4), new Vector2(1010, 92));
+            missionCard = card.gameObject;
+
+            var icon = Ui.Panel("Icon", card.transform, UiTheme.Amber);
+            icon.raycastTarget = false;
+            Ui.Anchor(icon.rectTransform, new Vector2(0f, 0.5f), new Vector2(26, 0), new Vector2(34, 34));
+            icon.rectTransform.localRotation = Quaternion.Euler(0, 0, 45);
+
+            missionText = Ui.Label("Text", card.transform, "", 30, UiTheme.TextMain,
+                                   TextAnchor.MiddleLeft);
+            Ui.Anchor(missionText.rectTransform, new Vector2(0f, 0.5f), new Vector2(84, 0), new Vector2(690, 84));
+
+            missionReward = Ui.Label("Reward", card.transform, "", 30, UiTheme.Gold,
+                                     TextAnchor.MiddleRight, FontStyle.Bold);
+            Ui.Anchor(missionReward.rectTransform, new Vector2(1f, 0.5f), new Vector2(-24, 0), new Vector2(210, 84));
         }
 
         Image ring;

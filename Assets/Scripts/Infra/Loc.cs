@@ -72,6 +72,12 @@ namespace Athanor.Infra
             { "ui_vol_musica", "Música" },
             { "ui_vol_sfx", "Efectos" },
             { "ui_ajuste_vibracion", "Vibración" },
+            { "ui_stats_titulo", "Estadísticas" },
+            { "ui_stat_tiempo", "Tiempo jugado" },
+            { "ui_stat_clicks", "Toques al matraz" },
+            { "ui_stat_esencia", "Esencia histórica" },
+            { "ui_stat_elementos", "Elementos descubiertos" },
+            { "ui_stat_logros", "Logros" },
         };
 
         public static string T(string key) =>

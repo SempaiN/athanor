@@ -85,8 +85,22 @@ namespace Athanor.Game
             }
         }
 
+        public event Action<MissionDef> MissionCompleted;
+
         void CheckAchievements()
         {
+            // Objetivos encadenados (misma cadencia que los logros)
+            var missions = MissionCatalog.CheckProgress(State);
+            if (missions.Count > 0)
+            {
+                foreach (var m in missions)
+                {
+                    AudioManager.Instance?.Discover();
+                    MissionCompleted?.Invoke(m);
+                }
+                StateChanged?.Invoke();
+            }
+
             var news = AchievementCatalog.CheckUnlocks(State);
             if (news.Count == 0) return;
             AchievementBonus = AchievementCatalog.TotalBonus(State);

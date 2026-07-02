@@ -1,5 +1,7 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
+using Athanor.Domain;
 using Athanor.Game;
 using Athanor.Infra;
 
@@ -11,7 +13,7 @@ namespace Athanor.UI
         GameController game;
         public RectTransform Root { get; private set; }
 
-        Text qualityLabel, soundLabel, vibrateLabel, resetLabel;
+        Text qualityLabel, soundLabel, vibrateLabel, resetLabel, statsText;
         Slider musicSlider, sfxSlider;
         Button resetBtn;
         bool confirmingReset;
@@ -66,7 +68,13 @@ namespace Athanor.UI
             vibrateLabel.color = UiTheme.Amber;
             Ui.Anchor((RectTransform)vBtn.transform, new Vector2(1f, 1f), new Vector2(-40, y + 14), new Vector2(400, 96));
             vBtn.onClick.AddListener(() => game.ToggleVibrate());
-            y -= 140;
+            y -= 124;
+
+            // Estadísticas de la partida
+            AddRowLabel("StatsTitle", Loc.T("ui_stats_titulo"), y);
+            statsText = Ui.Label("Stats", Root, "", 27, UiTheme.TextDim, TextAnchor.UpperLeft);
+            Ui.Anchor(statsText.rectTransform, new Vector2(0f, 1f), new Vector2(50, y - 54), new Vector2(940, 230));
+            y -= 300;
 
             // Info y enlace al repo
             var info = Ui.Label("Info", Root,
@@ -123,6 +131,19 @@ namespace Athanor.UI
             musicSlider.SetValueWithoutNotify(s.MusicVolume);
             sfxSlider.SetValueWithoutNotify(s.SfxVolume);
             resetLabel.text = confirmingReset ? Loc.T("ui_reset_confirmar") : Loc.T("ui_reset");
+
+            var t = TimeSpan.FromSeconds(s.PlaySeconds);
+            string tiempo = t.TotalHours >= 1
+                ? $"{(int)t.TotalHours} h {t.Minutes} min"
+                : $"{t.Minutes} min {t.Seconds} s";
+            statsText.text =
+                Loc.T("ui_stat_tiempo") + ": " + tiempo + "\n" +
+                Loc.T("ui_stat_clicks") + ": " + NumberFormat.Fmt(s.TotalClicks) + "\n" +
+                Loc.T("ui_stat_esencia") + ": " + NumberFormat.Fmt(s.LifetimeEssence) + "\n" +
+                Loc.T("ui_stat_elementos") + ": " + s.Discovered.Count + "/" + ElementCatalog.Elements.Count + "\n" +
+                Loc.T("ui_stat_logros") + ": " + s.AchievementsUnlocked.Count + "/" + AchievementCatalog.All.Count + "\n" +
+                Loc.T("ui_prestigios") + ": " + s.PrestigeCount + "  ·  " +
+                Loc.T("ui_quintaesencia") + ": " + NumberFormat.Fmt(s.Quintessence);
         }
     }
 }

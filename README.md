@@ -5,7 +5,10 @@ portrait, en español. Hecho con Unity 6.3 LTS (6000.3.19f1).
 
 ## Estado
 
-**En desarrollo — Etapa 1** (clicker core). Ver plan de etapas abajo.
+**v1.0 — juego completo y jugable.** Clicker + idle + 20 elementos combinables + prestigio +
+26 logros + mejoras + audio + progreso offline + actualizador in-app. Las 6 etapas del plan
+original están terminadas; el arte definitivo (assets del autor) queda pendiente y los
+placeholders actuales son 100 % procedurales.
 
 ## Documentación
 

@@ -296,6 +296,7 @@ namespace Athanor.EditorTools
                 PrestigeCount = 2,
                 ClickPowerLevel = 5,
                 LastSeenUnixUtc = 1712345678,
+                PlaySeconds = 3661.5,
                 HighQualityMode = true,
                 SoundOff = true,
                 MusicVolume = 0.4f,
@@ -327,6 +328,7 @@ namespace Athanor.EditorTools
                   "save viejo: volumen 1 por defecto");
             Check(back.TotalClicks == 777 && back.PrestigeCount == 2 && back.ClickPowerLevel == 5,
                   "save: contadores");
+            Check(Math.Abs(back.PlaySeconds - s.PlaySeconds) < 1e-9, "save: tiempo jugado");
             Check(back.LastSeenUnixUtc == 1712345678, "save: timestamp");
         }
 

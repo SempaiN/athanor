@@ -27,6 +27,7 @@ namespace Athanor.Domain
         public HashSet<string> UpgradesOwned = new HashSet<string>();
 
         public int ClickPowerLevel;         // mejoras de click compradas
+        public int MissionIndex;            // objetivo activo de la cadena (v1.1)
         public long LastSeenUnixUtc;        // para progreso offline
         public bool HighQualityMode;        // false = Alto Rendimiento (default)
         public bool SoundOff;               // invertido para que el default (false) = sonido ON
