@@ -27,6 +27,7 @@ namespace Athanor.Domain
         public int ClickPowerLevel;         // mejoras de click compradas
         public long LastSeenUnixUtc;        // para progreso offline
         public bool HighQualityMode;        // false = Alto Rendimiento (default)
+        public bool SoundOff;               // invertido para que el default (false) = sonido ON
 
         public double BalanceOf(ElementId id) =>
             Balances.TryGetValue(id, out var v) ? v : 0;

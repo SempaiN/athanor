@@ -88,5 +88,42 @@ namespace Athanor.UI
             rt.anchoredPosition = offset;
             rt.sizeDelta = size;
         }
+
+        /// Lista vertical con scroll táctil. Devuelve el content donde agregar filas
+        /// (fijar su sizeDelta.y al alto total del contenido).
+        public static RectTransform ScrollList(string name, Transform parent, out ScrollRect scroll)
+        {
+            var viewport = Rect(name, parent);
+            viewport.gameObject.AddComponent<Image>().color = new Color(0, 0, 0, 0.01f);
+            viewport.gameObject.AddComponent<RectMask2D>();
+            scroll = viewport.gameObject.AddComponent<ScrollRect>();
+
+            var content = Rect("Content", viewport);
+            content.anchorMin = new Vector2(0, 1);
+            content.anchorMax = new Vector2(1, 1);
+            content.pivot = new Vector2(0.5f, 1);
+            content.anchoredPosition = Vector2.zero;
+
+            scroll.content = content;
+            scroll.viewport = viewport;
+            scroll.horizontal = false;
+            scroll.vertical = true;
+            scroll.movementType = ScrollRect.MovementType.Clamped;
+            scroll.scrollSensitivity = 30;
+            scroll.inertia = true;
+            return content;
+        }
+
+        /// Fila dentro de un ScrollList: ocupa el ancho, alto fijo, apilada desde arriba.
+        public static void Row(RectTransform rt, int index, float rowHeight, float margin = 10)
+        {
+            rt.anchorMin = new Vector2(0, 1);
+            rt.anchorMax = new Vector2(1, 1);
+            rt.pivot = new Vector2(0.5f, 1);
+            rt.anchoredPosition = new Vector2(0, -(index * rowHeight) - margin);
+            rt.offsetMin = new Vector2(margin, rt.offsetMin.y);
+            rt.offsetMax = new Vector2(-margin, rt.offsetMax.y);
+            rt.sizeDelta = new Vector2(rt.sizeDelta.x, rowHeight - margin);
+        }
     }
 }

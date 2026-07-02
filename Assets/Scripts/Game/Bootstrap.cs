@@ -24,10 +24,11 @@ namespace Athanor.Game
             esGo.AddComponent<EventSystem>();
             esGo.AddComponent<StandaloneInputModule>();
 
-            // Controlador del juego
+            // Controlador del juego + audio (el orden importa: audio lee el estado)
             var gameGo = new GameObject("GameController");
             Object.DontDestroyOnLoad(gameGo);
             gameGo.AddComponent<GameController>();
+            gameGo.AddComponent<AudioManager>();
 
             // Canvas raíz (referencia 1080×1920 portrait)
             var canvasGo = new GameObject("Canvas");

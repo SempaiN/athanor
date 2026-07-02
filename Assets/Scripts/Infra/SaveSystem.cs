@@ -50,6 +50,7 @@ namespace Athanor.Infra
         public int clickPowerLevel;
         public long lastSeenUnixUtc;
         public bool highQualityMode;
+        public bool soundOff;
 
         public List<string> elementIds = new List<string>();
         public List<double> elementAmounts = new List<double>();
@@ -71,6 +72,7 @@ namespace Athanor.Infra
                 clickPowerLevel = s.ClickPowerLevel,
                 lastSeenUnixUtc = s.LastSeenUnixUtc,
                 highQualityMode = s.HighQualityMode,
+                soundOff = s.SoundOff,
             };
             foreach (var kv in s.Balances) { d.elementIds.Add(kv.Key.ToString()); d.elementAmounts.Add(kv.Value); }
             foreach (var e in s.Discovered) d.discovered.Add(e.ToString());
@@ -92,6 +94,7 @@ namespace Athanor.Infra
                 ClickPowerLevel = clickPowerLevel,
                 LastSeenUnixUtc = lastSeenUnixUtc,
                 HighQualityMode = highQualityMode,
+                SoundOff = soundOff,
             };
             for (int i = 0; i < elementIds.Count && i < elementAmounts.Count; i++)
                 if (Enum.TryParse(elementIds[i], out ElementId id))
