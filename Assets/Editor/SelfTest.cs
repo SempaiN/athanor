@@ -32,6 +32,7 @@ namespace Athanor.EditorTools
                 CombineRules();
                 TransmuteRules();
                 GeneratorRules();
+                UpgradeRules();
                 PrestigeRules();
                 OfflineRules();
                 AchievementRules();
@@ -185,6 +186,52 @@ namespace Athanor.EditorTools
             GeneratorCatalog.Tick(s, 1, 0);
             Check(Math.Abs(s.BalanceOf(ElementId.Barro) - 3) < 1e-6 &&
                   Math.Abs(s.BalanceOf(ElementId.Lava) - 3) < 1e-6, "crisol alterna materiales");
+
+            // Hitos: x2 por umbral alcanzado
+            Check(Math.Abs(GeneratorCatalog.MilestoneMult(9) - 1) < 1e-9, "sin hito antes de 10");
+            Check(Math.Abs(GeneratorCatalog.MilestoneMult(10) - 2) < 1e-9, "x2 con 10");
+            Check(Math.Abs(GeneratorCatalog.MilestoneMult(100) - 16) < 1e-9, "x16 con 100");
+            Check(GeneratorCatalog.NextMilestone(10) == 25, "próximo hito 25");
+            Check(GeneratorCatalog.NextMilestone(500) == 0, "sin hitos restantes");
+
+            s = new GameState();
+            s.GeneratorsOwned["aprendiz"] = 10; // 0.5*10*x2 = 10/s
+            GeneratorCatalog.Tick(s, 1, 0);
+            Check(Math.Abs(s.BalanceOf(ElementId.Tierra) - 10) < 1e-6, "hito aplicado en producción");
+        }
+
+        static void UpgradeRules()
+        {
+            Check(UpgradeCatalog.All.Count == 8, "8 mejoras");
+            Check(UpgradeCatalog.All.Select(u => u.Id).Distinct().Count() == 8, "ids de mejora únicos");
+
+            var s = new GameState();
+            Check(Math.Abs(UpgradeCatalog.ClickMult(s) - 1) < 1e-9, "click mult base 1");
+            Check(Math.Abs(UpgradeCatalog.ProdMult(s) - 1) < 1e-9, "prod mult base 1");
+
+            s.UpgradesOwned.Add("up_guantes");   // click x2
+            s.UpgradesOwned.Add("up_mercurio");  // click x3
+            Check(Math.Abs(UpgradeCatalog.ClickMult(s) - 6) < 1e-9, "clicks multiplicativos");
+            Check(Math.Abs(GameRules.ClickYield(s, 0) - 6) < 1e-9, "yield con mejoras");
+
+            s.UpgradesOwned.Add("up_simbolos");  // prod +25%
+            Check(Math.Abs(s.GlobalMultiplier(0) - 1.25) < 1e-9, "prod mult en multiplicador global");
+
+            // Offline con mejoras
+            Check(Math.Abs(GameRules.OfflineEssence(s, 10, 3600) - 10 * 3600 * 0.5) < 1e-6,
+                  "offline 50% sin mejora");
+            s.UpgradesOwned.Add("up_reloj");
+            Check(Math.Abs(GameRules.OfflineEssence(s, 10, 3600) - 10 * 3600 * 0.75) < 1e-6,
+                  "offline 75% con reloj");
+            s.UpgradesOwned.Add("up_calendario");
+            Check(Math.Abs(GameRules.OfflineEssence(s, 10, 100 * 3600) - 10 * 24 * 3600 * 0.75) < 1e-6,
+                  "tope 24h con calendario");
+
+            // El prestigio limpia las mejoras
+            s.LifetimeEssence = 4e6;
+            s.Discovered.Add(ElementId.PiedraFilosofal);
+            GameRules.DoPrestige(s);
+            Check(s.UpgradesOwned.Count == 0, "prestigio limpia mejoras");
         }
 
         static void PrestigeRules()
@@ -256,6 +303,7 @@ namespace Athanor.EditorTools
             s.Add(ElementId.Vapor, 3);
             s.GeneratorsOwned["brasero"] = 4;
             s.AchievementsUnlocked.Add("ess_1k");
+            s.UpgradesOwned.Add("up_guantes");
 
             string json = JsonUtility.ToJson(SaveDto.From(s));
             var back = JsonUtility.FromJson<SaveDto>(json).ToState();
@@ -266,6 +314,7 @@ namespace Athanor.EditorTools
                   "save: descubiertos");
             Check(back.GeneratorsOwned["brasero"] == 4, "save: generadores");
             Check(back.AchievementsUnlocked.Contains("ess_1k"), "save: logros");
+            Check(back.UpgradesOwned.Contains("up_guantes"), "save: mejoras");
             Check(back.HighQualityMode && back.SoundOff, "save: flags");
             Check(back.TotalClicks == 777 && back.PrestigeCount == 2 && back.ClickPowerLevel == 5,
                   "save: contadores");

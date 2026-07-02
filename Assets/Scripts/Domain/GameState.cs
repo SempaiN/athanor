@@ -23,6 +23,7 @@ namespace Athanor.Domain
 
         public Dictionary<string, int> GeneratorsOwned = new Dictionary<string, int>();
         public HashSet<string> AchievementsUnlocked = new HashSet<string>();
+        public HashSet<string> UpgradesOwned = new HashSet<string>();
 
         public int ClickPowerLevel;         // mejoras de click compradas
         public long LastSeenUnixUtc;        // para progreso offline
@@ -39,8 +40,8 @@ namespace Athanor.Domain
                 Discovered.Add(id);
         }
 
-        /// Multiplicador global de producción: prestigio + logros.
+        /// Multiplicador global de producción: prestigio + logros + mejoras compradas.
         public double GlobalMultiplier(double achievementBonus) =>
-            (1.0 + 0.10 * Quintessence) * (1.0 + achievementBonus);
+            (1.0 + 0.10 * Quintessence) * (1.0 + achievementBonus) * UpgradeCatalog.ProdMult(this);
     }
 }

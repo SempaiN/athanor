@@ -58,6 +58,7 @@ namespace Athanor.Infra
         public List<string> generatorIds = new List<string>();
         public List<int> generatorCounts = new List<int>();
         public List<string> achievements = new List<string>();
+        public List<string> upgrades = new List<string>();
 
         public static SaveDto From(GameState s)
         {
@@ -78,6 +79,7 @@ namespace Athanor.Infra
             foreach (var e in s.Discovered) d.discovered.Add(e.ToString());
             foreach (var kv in s.GeneratorsOwned) { d.generatorIds.Add(kv.Key); d.generatorCounts.Add(kv.Value); }
             foreach (var a in s.AchievementsUnlocked) d.achievements.Add(a);
+            foreach (var u in s.UpgradesOwned) d.upgrades.Add(u);
             return d;
         }
 
@@ -105,6 +107,7 @@ namespace Athanor.Infra
             for (int i = 0; i < generatorIds.Count && i < generatorCounts.Count; i++)
                 s.GeneratorsOwned[generatorIds[i]] = generatorCounts[i];
             foreach (var a in achievements) s.AchievementsUnlocked.Add(a);
+            foreach (var u in upgrades) s.UpgradesOwned.Add(u);
             return s;
         }
     }

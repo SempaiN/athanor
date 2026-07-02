@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -33,6 +34,25 @@ namespace Athanor.Domain
 
         public static GeneratorDef Get(string id) => byId[id];
 
+        static readonly int[] MilestoneThresholds = { 10, 25, 50, 100, 200 };
+
+        /// x2 de producción por cada hito de cantidad alcanzado (10/25/50/100/200).
+        public static double MilestoneMult(int owned)
+        {
+            int passed = 0;
+            foreach (var t in MilestoneThresholds)
+                if (owned >= t) passed++;
+            return Math.Pow(2, passed);
+        }
+
+        /// Próximo hito pendiente, o 0 si ya pasó todos.
+        public static int NextMilestone(int owned)
+        {
+            foreach (var t in MilestoneThresholds)
+                if (owned < t) return t;
+            return 0;
+        }
+
         /// Aplica la producción de todos los generadores durante deltaSeconds.
         public static void Tick(GameState s, double deltaSeconds, double achievementBonus)
         {
@@ -49,7 +69,8 @@ namespace Athanor.Domain
                     continue;
                 }
 
-                double units = gen.BaseProd * owned * mult * deltaSeconds / gen.Produces.Length;
+                double units = gen.BaseProd * owned * MilestoneMult(owned) * mult
+                               * deltaSeconds / gen.Produces.Length;
                 foreach (var el in gen.Produces)
                     s.Add(el, units);
             }

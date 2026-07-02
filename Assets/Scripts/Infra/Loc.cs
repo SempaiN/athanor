@@ -66,6 +66,9 @@ namespace Athanor.Infra
             { "ui_comprar_modo", "Cantidad de compra:" },
             { "ui_max", "Máx" },
             { "ui_hint_sin_ayudantes", "Transmutá elementos y contratá tu primer ayudante" },
+            { "ui_mejoras_titulo", "— Mejoras del laboratorio —" },
+            { "ui_adquirida", "Adquirida" },
+            { "ui_hito", "Hito:" },
         };
 
         public static string T(string key) =>

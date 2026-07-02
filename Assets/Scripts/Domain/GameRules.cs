@@ -14,7 +14,8 @@ namespace Athanor.Domain
 
         /// Unidades de cada elemento base que otorga un click.
         public static double ClickYield(GameState s, double achievementBonus) =>
-            Math.Pow(2, s.ClickPowerLevel) * s.GlobalMultiplier(achievementBonus);
+            Math.Pow(2, s.ClickPowerLevel) * s.GlobalMultiplier(achievementBonus)
+            * UpgradeCatalog.ClickMult(s);
 
         public static void ApplyClick(GameState s, double achievementBonus)
         {
@@ -108,6 +109,7 @@ namespace Athanor.Domain
             s.Essence = 0;
             s.Balances.Clear();
             s.GeneratorsOwned.Clear();
+            s.UpgradesOwned.Clear();
             s.ClickPowerLevel = 0;
         }
 
@@ -119,6 +121,14 @@ namespace Athanor.Domain
             double capped = Math.Min(secondsAway, OfflineCapHours * 3600);
             if (capped <= 0) return 0;
             return essencePerSecond * capped * OfflineEfficiency;
+        }
+
+        /// Variante que respeta las mejoras compradas (eficiencia y tope).
+        public static double OfflineEssence(GameState s, double essencePerSecond, double secondsAway)
+        {
+            double capped = Math.Min(secondsAway, UpgradeCatalog.OfflineCapHours(s) * 3600);
+            if (capped <= 0) return 0;
+            return essencePerSecond * capped * UpgradeCatalog.OfflineEfficiency(s);
         }
     }
 }

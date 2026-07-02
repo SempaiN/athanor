@@ -22,7 +22,17 @@ namespace Athanor.UI
             public Text BuyLabel;
         }
 
+        sealed class UpgradeCard
+        {
+            public UpgradeDef Def;
+            public Image Bg, Stripe;
+            public Text Name, Desc;
+            public Button Buy;
+            public Text BuyLabel;
+        }
+
         readonly List<Card> cards = new List<Card>();
+        readonly List<UpgradeCard> upgradeCards = new List<UpgradeCard>();
         readonly List<(int mode, Image bg, Text label)> modeButtons = new List<(int, Image, Text)>();
         Text hint;
         int buyMode = 1; // 1, 10, 0 = Máx
@@ -78,7 +88,55 @@ namespace Athanor.UI
                 i++;
             }
 
-            content.sizeDelta = new Vector2(0, cards.Count * RowH + 20);
+            // Sección de mejoras globales (compra única) al final de la lista
+            float sectionY = cards.Count * RowH + 14;
+            const float TitleH = 76;
+
+            var sectionTitle = Ui.Label("UpgradesTitle", content, Loc.T("ui_mejoras_titulo"), 36,
+                                        UiTheme.Gold, TextAnchor.MiddleCenter, FontStyle.Bold);
+            var stRt = sectionTitle.rectTransform;
+            stRt.anchorMin = new Vector2(0, 1);
+            stRt.anchorMax = new Vector2(1, 1);
+            stRt.pivot = new Vector2(0.5f, 1);
+            stRt.anchoredPosition = new Vector2(0, -sectionY);
+            stRt.sizeDelta = new Vector2(0, TitleH);
+
+            float upgradesBase = sectionY + TitleH;
+            for (int u = 0; u < UpgradeCatalog.All.Count; u++)
+            {
+                var def = UpgradeCatalog.All[u];
+                var uc = new UpgradeCard { Def = def };
+                uc.Bg = Ui.Panel("Up_" + def.Id, content, UiTheme.Card);
+                var upRt = uc.Bg.rectTransform;
+                upRt.anchorMin = new Vector2(0, 1);
+                upRt.anchorMax = new Vector2(1, 1);
+                upRt.pivot = new Vector2(0.5f, 1);
+                upRt.anchoredPosition = new Vector2(0, -(upgradesBase + u * RowH) - 10);
+                upRt.offsetMin = new Vector2(10, upRt.offsetMin.y);
+                upRt.offsetMax = new Vector2(-10, upRt.offsetMax.y);
+                upRt.sizeDelta = new Vector2(upRt.sizeDelta.x, RowH - 10);
+
+                uc.Stripe = Ui.Panel("Stripe", uc.Bg.transform, UiTheme.Gold, rounded: false);
+                uc.Stripe.raycastTarget = false;
+                Ui.Anchor(uc.Stripe.rectTransform, new Vector2(0f, 0.5f), new Vector2(0, 0), new Vector2(10, RowH - 10));
+
+                uc.Name = Ui.Label("Name", uc.Bg.transform, def.Name, 40, UiTheme.TextMain,
+                                   TextAnchor.MiddleLeft, FontStyle.Bold);
+                Ui.Anchor(uc.Name.rectTransform, new Vector2(0f, 1f), new Vector2(34, -16), new Vector2(600, 50));
+
+                uc.Desc = Ui.Label("Desc", uc.Bg.transform, def.Desc, 30, UiTheme.TextDim, TextAnchor.UpperLeft);
+                Ui.Anchor(uc.Desc.rectTransform, new Vector2(0f, 1f), new Vector2(34, -72), new Vector2(600, 66));
+
+                uc.Buy = Ui.TextButton("Buy", uc.Bg.transform, UiTheme.Gold, out uc.BuyLabel);
+                uc.BuyLabel.fontSize = 30;
+                Ui.Anchor((RectTransform)uc.Buy.transform, new Vector2(1f, 0.5f), new Vector2(-20, 0), new Vector2(250, 120));
+                var d = def;
+                uc.Buy.onClick.AddListener(() => game.BuyUpgrade(d));
+
+                upgradeCards.Add(uc);
+            }
+
+            content.sizeDelta = new Vector2(0, upgradesBase + upgradeCards.Count * RowH + 40);
         }
 
         void BuildHeader()
@@ -116,12 +174,20 @@ namespace Athanor.UI
             return GameRules.MaxAffordable(def.BaseCost, game.GeneratorOwned(def.Id), game.State.Essence);
         }
 
-        static string ProduceText(GeneratorDef g, double mult)
+        static string ProduceText(GeneratorDef g, int owned, double mult)
         {
             if (g.AutoCombine) return Loc.T("ui_combina_solo");
-            double perElement = g.BaseProd * mult / g.Produces.Length;
             var names = string.Join(" + ", g.Produces.Select(e => Loc.T(ElementCatalog.Get(e).NameKey)));
-            return Loc.T("ui_produce") + " " + NumberFormat.Fmt(perElement) + "/s " + names + " (por unidad)";
+            double milestone = GeneratorCatalog.MilestoneMult(owned);
+            double total = g.BaseProd * owned * milestone * mult / g.Produces.Length;
+            int next = GeneratorCatalog.NextMilestone(owned);
+
+            string line = owned > 0
+                ? Loc.T("ui_produce") + " " + NumberFormat.Fmt(total) + "/s " + names
+                : Loc.T("ui_produce") + " " + NumberFormat.Fmt(g.BaseProd * mult / g.Produces.Length) + "/s " + names;
+            if (milestone > 1) line += "  (x" + NumberFormat.Fmt(milestone) + ")";
+            if (next > 0) line += "\n" + Loc.T("ui_hito") + " " + next + " -> x2";
+            return line;
         }
 
         public void Refresh()
@@ -161,9 +227,35 @@ namespace Athanor.UI
                 double cost = GameRules.BulkCost(c.Def.BaseCost, owned, shownCount);
 
                 c.Owned.text = "x" + owned;
-                c.Info.text = ProduceText(c.Def, mult);
+                c.Info.text = ProduceText(c.Def, owned, mult);
                 c.BuyLabel.text = Loc.T("ui_comprar") + " x" + shownCount + "\n" + NumberFormat.Fmt(cost);
                 c.Buy.interactable = count > 0 && s.Essence >= cost;
+            }
+
+            foreach (var uc in upgradeCards)
+            {
+                bool ownedUp = s.UpgradesOwned.Contains(uc.Def.Id);
+                bool visible = ownedUp || s.LifetimeEssence >= uc.Def.Cost * 0.25;
+
+                uc.Name.text = visible ? uc.Def.Name : Loc.T("ui_desconocido");
+                uc.Desc.text = visible ? uc.Def.Desc : "";
+                uc.Stripe.color = ownedUp ? UiTheme.Gold : new Color(1, 1, 1, 0.06f);
+                uc.Bg.color = ownedUp
+                    ? UiTheme.Card
+                    : new Color(UiTheme.Card.r, UiTheme.Card.g, UiTheme.Card.b, 0.75f);
+
+                if (ownedUp)
+                {
+                    uc.BuyLabel.text = Loc.T("ui_adquirida");
+                    uc.Buy.interactable = false;
+                }
+                else
+                {
+                    uc.BuyLabel.text = visible
+                        ? Loc.T("ui_comprar") + "\n" + NumberFormat.Fmt(uc.Def.Cost)
+                        : Loc.T("ui_desconocido");
+                    uc.Buy.interactable = visible && s.Essence >= uc.Def.Cost;
+                }
             }
         }
     }

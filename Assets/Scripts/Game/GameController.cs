@@ -49,7 +49,7 @@ namespace Athanor.Game
             if (State.LastSeenUnixUtc <= 0) return;
             double away = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - State.LastSeenUnixUtc;
             if (away < 60) return; // menos de 1 min fuera: nada
-            OfflineGain = GameRules.OfflineEssence(EssencePerSecond(), away);
+            OfflineGain = GameRules.OfflineEssence(State, EssencePerSecond(), away);
             if (OfflineGain > 0)
             {
                 State.Essence += OfflineGain;
@@ -146,7 +146,7 @@ namespace Athanor.Game
             if (State.LastSeenUnixUtc <= 0) return;
             double away = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - State.LastSeenUnixUtc;
             if (away < 60) return;
-            double gain = GameRules.OfflineEssence(EssencePerSecond(), away);
+            double gain = GameRules.OfflineEssence(State, EssencePerSecond(), away);
             State.LastSeenUnixUtc = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             if (gain <= 0) return;
             State.Essence += gain;
@@ -236,11 +236,24 @@ namespace Athanor.Game
             {
                 int owned = GeneratorOwned(g.Id);
                 if (owned == 0 || g.Produces.Length == 0) continue;
-                double unitsPerElement = g.BaseProd * owned * mult / g.Produces.Length;
+                double unitsPerElement = g.BaseProd * owned * GeneratorCatalog.MilestoneMult(owned)
+                                         * mult / g.Produces.Length;
                 foreach (var el in g.Produces)
                     sum += unitsPerElement * ElementCatalog.Get(el).EssenceValue;
             }
             return sum;
+        }
+
+        // ---- Mejoras globales (compra única) ----
+
+        public bool BuyUpgrade(UpgradeDef u)
+        {
+            if (State.UpgradesOwned.Contains(u.Id) || State.Essence < u.Cost) return false;
+            State.Essence -= u.Cost;
+            State.UpgradesOwned.Add(u.Id);
+            AudioManager.Instance?.Buy();
+            StateChanged?.Invoke();
+            return true;
         }
 
         // ---- Prestigio: La Gran Obra ----
