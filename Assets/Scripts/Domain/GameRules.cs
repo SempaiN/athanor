@@ -61,6 +61,25 @@ namespace Athanor.Domain
             return gained;
         }
 
+        /// Venta automática según las mejoras de automatización (1 vez por segundo).
+        /// El Alambique perpetuo deja una reserva de 50 por elemento para combinar.
+        public static double AutoSell(GameState s)
+        {
+            double gained = 0;
+            if (UpgradeCatalog.Has(s, UpgradeEffect.AutoSellSurplus))
+                foreach (var def in ElementCatalog.Elements)
+                {
+                    if (def.Id == ElementId.PiedraFilosofal) continue;
+                    double excess = s.BalanceOf(def.Id) - 50;
+                    if (excess > 0) gained += Transmute(s, def.Id, excess);
+                }
+            if (UpgradeCatalog.Has(s, UpgradeEffect.AutoSellBasics))
+                foreach (var def in ElementCatalog.Elements)
+                    if (def.Tier == 0)
+                        gained += Transmute(s, def.Id, s.BalanceOf(def.Id));
+            return gained;
+        }
+
         // ---- Generadores ----
 
         public static double GeneratorCost(double baseCost, int owned) =>

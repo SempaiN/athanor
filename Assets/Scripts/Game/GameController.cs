@@ -124,6 +124,8 @@ namespace Athanor.Game
             StateChanged?.Invoke();
         }
 
+        float autoSellTimer;
+
         bool TickGenerators(double dt)
         {
             bool any = State.GeneratorsOwned.Values.Any(n => n > 0);
@@ -131,6 +133,13 @@ namespace Athanor.Game
 
             GeneratorCatalog.Tick(State, dt, AchievementBonus);
             TickTransmuter(dt);
+
+            autoSellTimer += (float)dt;
+            if (autoSellTimer >= 1f)
+            {
+                autoSellTimer = 0;
+                GameRules.AutoSell(State); // silencioso: el refresh periódico ya lo refleja
+            }
             return true;
         }
 

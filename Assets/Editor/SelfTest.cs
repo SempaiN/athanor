@@ -205,8 +205,23 @@ namespace Athanor.EditorTools
 
         static void UpgradeRules()
         {
-            Check(UpgradeCatalog.All.Count == 8, "8 mejoras");
-            Check(UpgradeCatalog.All.Select(u => u.Id).Distinct().Count() == 8, "ids de mejora únicos");
+            Check(UpgradeCatalog.All.Count == 10, "10 mejoras");
+            Check(UpgradeCatalog.All.Select(u => u.Id).Distinct().Count() == 10, "ids de mejora únicos");
+
+            // Automatización
+            var auto = new GameState();
+            auto.Add(ElementId.Tierra, 200);
+            auto.Add(ElementId.Oro, 80);
+            Check(GameRules.AutoSell(auto) == 0, "sin mejoras no auto-vende");
+
+            auto.UpgradesOwned.Add("up_sifon");
+            double g1 = GameRules.AutoSell(auto);
+            Check(Math.Abs(auto.BalanceOf(ElementId.Tierra)) < 1e-9 && g1 >= 200, "sifón vende básicos");
+            Check(Math.Abs(auto.BalanceOf(ElementId.Oro) - 80) < 1e-9, "sifón no toca tiers altos");
+
+            auto.UpgradesOwned.Add("up_perpetuo");
+            GameRules.AutoSell(auto);
+            Check(Math.Abs(auto.BalanceOf(ElementId.Oro) - 50) < 1e-9, "perpetuo deja reserva de 50");
 
             var s = new GameState();
             Check(Math.Abs(UpgradeCatalog.ClickMult(s) - 1) < 1e-9, "click mult base 1");

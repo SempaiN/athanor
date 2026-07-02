@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Athanor.Domain
 {
-    public enum UpgradeEffect { ClickMult, ProdMult, OfflineEfficiency, OfflineCapHours }
+    public enum UpgradeEffect { ClickMult, ProdMult, OfflineEfficiency, OfflineCapHours, AutoSellBasics, AutoSellSurplus }
 
     public sealed class UpgradeDef
     {
@@ -29,6 +29,9 @@ namespace Athanor.Domain
             new UpgradeDef { Id = "up_calendario",  Name = "Calendario lunar",      Desc = "Tope offline: 24 horas",       Cost = 5_000_000,   Effect = UpgradeEffect.OfflineCapHours,   Value = 24 },
             new UpgradeDef { Id = "up_catalizador", Name = "Catalizador áureo",     Desc = "Producción total x2",          Cost = 20_000_000,  Effect = UpgradeEffect.ProdMult,          Value = 2 },
             new UpgradeDef { Id = "up_midas",       Name = "Dedo de Midas",         Desc = "Poder de click x5",            Cost = 100_000_000, Effect = UpgradeEffect.ClickMult,         Value = 5 },
+            // Automatización de late-game (inspiración: Egg Inc.)
+            new UpgradeDef { Id = "up_sifon",       Name = "Sifón de esencia",      Desc = "Auto-vende los básicos cada segundo",              Cost = 50_000_000,  Effect = UpgradeEffect.AutoSellBasics,  Value = 1 },
+            new UpgradeDef { Id = "up_perpetuo",    Name = "Alambique perpetuo",    Desc = "Auto-vende el excedente de todo (reserva 50 c/u)", Cost = 500_000_000, Effect = UpgradeEffect.AutoSellSurplus, Value = 1 },
         };
 
         static readonly Dictionary<string, UpgradeDef> byId = All.ToDictionary(u => u.Id);
@@ -36,6 +39,9 @@ namespace Athanor.Domain
 
         static IEnumerable<UpgradeDef> Owned(GameState s) =>
             All.Where(u => s.UpgradesOwned.Contains(u.Id));
+
+        public static bool Has(GameState s, UpgradeEffect effect) =>
+            Owned(s).Any(u => u.Effect == effect);
 
         public static double ClickMult(GameState s) =>
             Owned(s).Where(u => u.Effect == UpgradeEffect.ClickMult)

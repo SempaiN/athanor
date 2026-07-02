@@ -117,6 +117,7 @@ namespace Athanor.UI
 
                 if (!visible)
                 {
+                    row.OutDot.sprite = UiTheme.Circle(); // sin spoilers de la silueta
                     row.OutDot.color = new Color(1, 1, 1, 0.08f);
                     row.Title.text = Loc.T("ui_desconocido");
                     row.OwnedText.text = "";
@@ -141,6 +142,7 @@ namespace Athanor.UI
 
                 if (!discovered)
                 {
+                    row.OutDot.sprite = UiTheme.Circle(); // sin spoilers de la silueta
                     row.OutDot.color = new Color(1, 1, 1, 0.15f);
                     row.Title.text = "?";
                     row.OwnedText.text = Loc.T("ui_receta_oculta");
@@ -150,6 +152,7 @@ namespace Athanor.UI
                 }
 
                 double owned = s.BalanceOf(r.Output);
+                row.OutDot.sprite = ProceduralIcons.For(r.Output);
                 row.OutDot.color = ProceduralIcons.TintFor(r.Output, UiTheme.ElementColor(outDef.ColorHex));
                 row.Title.text = Loc.T(outDef.NameKey);
                 row.OwnedText.color = UiTheme.Amber;
