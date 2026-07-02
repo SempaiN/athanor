@@ -22,8 +22,11 @@ namespace Athanor.EditorTools
                 Configure();
                 EnsureScene();
 
-                Directory.CreateDirectory("Builds");
-                string apkPath = $"Builds/athanor-v{Athanor.GameVersion.Version}.apk";
+                // Ruta absoluta anclada al proyecto (el CWD de Unity en batchmode no es fiable)
+                string projectRoot = Directory.GetParent(Application.dataPath).FullName;
+                string buildsDir = Path.Combine(projectRoot, "Builds");
+                Directory.CreateDirectory(buildsDir);
+                string apkPath = Path.Combine(buildsDir, $"athanor-v{Athanor.GameVersion.Version}.apk");
 
                 var options = new BuildPlayerOptions
                 {
@@ -34,7 +37,8 @@ namespace Athanor.EditorTools
                 };
 
                 var report = BuildPipeline.BuildPlayer(options);
-                bool ok = report.summary.result == UnityEditor.Build.Reporting.BuildResult.Succeeded;
+                bool ok = report.summary.result == UnityEditor.Build.Reporting.BuildResult.Succeeded
+                          && File.Exists(apkPath);
                 Debug.Log($"[BuildScript] Resultado: {report.summary.result}, " +
                           $"tamaño: {report.summary.totalSize / (1024 * 1024)} MB, salida: {apkPath}");
                 EditorApplication.Exit(ok ? 0 : 1);
