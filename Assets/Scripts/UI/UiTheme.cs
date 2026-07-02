@@ -136,6 +136,17 @@ namespace Athanor.UI
                             // margen interior para que se vea el vidrio alrededor
                             a *= Mathf.Clamp01(hw - dx - 9f + 1f);
                         }
+                        else
+                        {
+                            // marcas de medición en la pared izquierda del cuerpo
+                            bool markBand = (y > 150 && y < 158) || (y > 200 && y < 208) || (y > 250 && y < 258);
+                            if (markBand)
+                            {
+                                float innerX = 256f - hw;
+                                if (x - innerX > 12 && x - innerX < 52)
+                                    a = Mathf.Min(1f, a + 0.55f);
+                            }
+                        }
                     }
                     byte alpha = (byte)(a * 255);
                     px[y * size + x] = new Color32(255, 255, 255, alpha);

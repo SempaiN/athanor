@@ -254,9 +254,9 @@ namespace Athanor.UI
                 float cx = -510 + slot * (i + 0.5f);
 
                 var dot = Ui.Panel("Dot_" + el, bar.transform, UiTheme.ElementColor(def.ColorHex));
-                dot.sprite = UiTheme.Circle();
+                dot.sprite = ProceduralIcons.For(el);
                 dot.type = Image.Type.Simple;
-                Ui.Anchor(dot.rectTransform, new Vector2(0.5f, 0f), new Vector2(cx, 96), new Vector2(36, 36));
+                Ui.Anchor(dot.rectTransform, new Vector2(0.5f, 0f), new Vector2(cx, 92), new Vector2(44, 44));
 
                 var counter = Ui.Label("Count_" + el, bar.transform, "0", 38, UiTheme.TextMain,
                                        TextAnchor.MiddleCenter);

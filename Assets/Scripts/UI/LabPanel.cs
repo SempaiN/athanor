@@ -149,6 +149,13 @@ namespace Athanor.UI
             Ui.Fill(liquid.rectTransform);
             liquidRt = liquid.rectTransform;
 
+            // Línea de superficie del líquido (se mueve con el vaivén)
+            var surface = Ui.Panel("Surface", liquidRt, new Color(1f, 1f, 1f, 0.22f));
+            surface.sprite = UiTheme.Circle();
+            surface.type = Image.Type.Simple;
+            surface.raycastTarget = false;
+            Ui.Place(surface.rectTransform, 0, -14, 168, 22);
+
             var glass = Ui.Panel("Glass", flask, new Color(UiTheme.Amber.r, UiTheme.Amber.g, UiTheme.Amber.b, 0.35f), rounded: false);
             glass.sprite = UiTheme.FlaskGlass();
             glass.type = Image.Type.Simple;
@@ -294,11 +301,14 @@ namespace Athanor.UI
             var parts = new List<(RectTransform rt, Image img, Vector2 dir)>();
             for (int i = 0; i < count; i++)
             {
-                var def = ElementCatalog.Get(BaseElements[i % BaseElements.Length]);
+                var el = BaseElements[i % BaseElements.Length];
+                var def = ElementCatalog.Get(el);
                 var img = GetParticle();
+                img.sprite = ProceduralIcons.For(el); // mini icono del elemento
                 img.color = UiTheme.ElementColor(def.ColorHex);
                 float ang = Random.Range(0f, Mathf.PI * 2);
-                Ui.Place(img.rectTransform, 0, 90, 24, 24);
+                Ui.Place(img.rectTransform, 0, 90, 34, 34);
+                img.rectTransform.localRotation = Quaternion.Euler(0, 0, Random.Range(-25f, 25f));
                 parts.Add((img.rectTransform, img, new Vector2(Mathf.Cos(ang), Mathf.Sin(ang))));
             }
 

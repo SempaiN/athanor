@@ -48,9 +48,9 @@ namespace Athanor.UI
                 Ui.Anchor(row.Stripe.rectTransform, new Vector2(0f, 0.5f), new Vector2(0, 0), new Vector2(10, RowH - 10));
 
                 row.Medal = Ui.Panel("Medal", row.Bg.transform, UiTheme.TextDim);
-                row.Medal.sprite = UiTheme.Circle();
+                row.Medal.sprite = ProceduralIcons.Star();
                 row.Medal.type = Image.Type.Simple;
-                Ui.Anchor(row.Medal.rectTransform, new Vector2(0f, 0.5f), new Vector2(28, 0), new Vector2(64, 64));
+                Ui.Anchor(row.Medal.rectTransform, new Vector2(0f, 0.5f), new Vector2(26, 0), new Vector2(68, 68));
 
                 row.Name = Ui.Label("Name", row.Bg.transform, def.Name, 36, UiTheme.TextMain,
                                     TextAnchor.MiddleLeft, FontStyle.Bold);

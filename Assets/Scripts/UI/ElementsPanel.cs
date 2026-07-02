@@ -61,9 +61,9 @@ namespace Athanor.UI
                 Ui.Row(bg.rectTransform, i, RowH);
 
                 row.OutDot = Ui.Panel("Dot", bg.transform, UiTheme.TextDim);
-                row.OutDot.sprite = UiTheme.Circle();
+                row.OutDot.sprite = ProceduralIcons.For(recipe.Output);
                 row.OutDot.type = Image.Type.Simple;
-                Ui.Anchor(row.OutDot.rectTransform, new Vector2(0f, 1f), new Vector2(28, -22), new Vector2(44, 44));
+                Ui.Anchor(row.OutDot.rectTransform, new Vector2(0f, 1f), new Vector2(22, -16), new Vector2(56, 56));
 
                 // Chip de tier (T1..T5) con color propio
                 int tier = ElementCatalog.Get(recipe.Output).Tier;

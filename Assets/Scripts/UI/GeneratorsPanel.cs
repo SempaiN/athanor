@@ -66,16 +66,25 @@ namespace Athanor.UI
                 stripe.raycastTarget = false;
                 Ui.Anchor(stripe.rectTransform, new Vector2(0f, 0.5f), new Vector2(0, 0), new Vector2(10, RowH - 10));
 
+                // Icono: el elemento que produce (o rombo arcano para el Transmutador)
+                var icon = Ui.Panel("Icon", bg.transform, g.Produces.Length > 0
+                    ? UiTheme.ElementColor(ElementCatalog.Get(g.Produces[0]).ColorHex)
+                    : UiTheme.Violet);
+                icon.sprite = g.Produces.Length > 0 ? ProceduralIcons.For(g.Produces[0]) : ProceduralIcons.Diamond();
+                icon.type = Image.Type.Simple;
+                icon.raycastTarget = false;
+                Ui.Anchor(icon.rectTransform, new Vector2(0f, 0.5f), new Vector2(26, 8), new Vector2(58, 58));
+
                 card.Name = Ui.Label("Name", bg.transform, "", 42, UiTheme.TextMain,
                                      TextAnchor.MiddleLeft, FontStyle.Bold);
-                Ui.Anchor(card.Name.rectTransform, new Vector2(0f, 1f), new Vector2(34, -14), new Vector2(520, 52));
+                Ui.Anchor(card.Name.rectTransform, new Vector2(0f, 1f), new Vector2(102, -14), new Vector2(460, 52));
 
                 card.Owned = Ui.Label("Owned", bg.transform, "", 38, UiTheme.Amber,
                                       TextAnchor.MiddleRight, FontStyle.Bold);
                 Ui.Anchor(card.Owned.rectTransform, new Vector2(1f, 1f), new Vector2(-300, -14), new Vector2(150, 52));
 
                 card.Info = Ui.Label("Info", bg.transform, "", 30, UiTheme.TextDim, TextAnchor.UpperLeft);
-                Ui.Anchor(card.Info.rectTransform, new Vector2(0f, 1f), new Vector2(34, -70), new Vector2(600, 70));
+                Ui.Anchor(card.Info.rectTransform, new Vector2(0f, 1f), new Vector2(102, -70), new Vector2(560, 70));
 
                 card.Buy = Ui.TextButton("Buy", bg.transform, UiTheme.Green, out card.BuyLabel);
                 card.BuyLabel.fontSize = 30;

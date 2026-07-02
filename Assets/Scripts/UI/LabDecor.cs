@@ -70,15 +70,16 @@ namespace Athanor.UI
             Shelf(estanteriaDer.transform, 430, 520, woodLight,
                   new[] { UiTheme.ElementColor("#E8C547"), UiTheme.ElementColor("#9B72CF"), UiTheme.ElementColor("#B59F7E") });
 
-            // Símbolos de pared — hito: Tria Prima
+            // Símbolos de pared — hito: Tria Prima (azufre, mercurio y sal de verdad)
             simbolos = Prop("Simbolos");
+            ElementId[] tria = { ElementId.Azufre, ElementId.Mercurio, ElementId.Sal };
             for (int i = 0; i < 3; i++)
             {
-                var sym = Ui.Panel("Sym" + i, simbolos.transform, new Color(0.95f, 0.90f, 0.80f, 0.18f));
-                sym.sprite = UiTheme.Circle();
+                var sym = Ui.Panel("Sym" + i, simbolos.transform, new Color(0.95f, 0.90f, 0.80f, 0.16f));
+                sym.sprite = ProceduralIcons.For(tria[i]);
                 sym.type = Image.Type.Simple;
                 sym.raycastTarget = false;
-                Ui.Anchor(sym.rectTransform, new Vector2(0.5f, 1f), new Vector2((i - 1) * 200, -40), new Vector2(90 + i * 8, 90 + i * 8));
+                Ui.Anchor(sym.rectTransform, new Vector2(0.5f, 1f), new Vector2((i - 1) * 210, -44), new Vector2(96, 96));
             }
 
             // Candelabro — hito: primer Oro
@@ -127,6 +128,9 @@ namespace Athanor.UI
             return rt.gameObject;
         }
 
+        static readonly ElementId[] ShelfShapes =
+            { ElementId.Agua, ElementId.Vida, ElementId.Fuego };
+
         void Shelf(Transform parent, float x, float y, Color wood, Color[] flaskColors)
         {
             var board = Ui.Panel("Tabla", parent, wood, rounded: false);
@@ -134,11 +138,12 @@ namespace Athanor.UI
             Ui.Place(board.rectTransform, x, y, 220, 18);
             for (int i = 0; i < flaskColors.Length; i++)
             {
+                // Frascos con siluetas variadas (gota, hoja, llama) en vez de bolitas
                 var fl = Ui.Panel("Frasco" + i, parent, flaskColors[i]);
-                fl.sprite = UiTheme.Circle();
+                fl.sprite = ProceduralIcons.For(ShelfShapes[i % ShelfShapes.Length]);
                 fl.type = Image.Type.Simple;
                 fl.raycastTarget = false;
-                Ui.Place(fl.rectTransform, x - 60 + i * 60, y + 34, 42, 42);
+                Ui.Place(fl.rectTransform, x - 60 + i * 60, y + 36, 46, 46);
             }
         }
 
