@@ -225,42 +225,44 @@ namespace Athanor.UI
         void BuildTopBar()
         {
             var bar = Ui.Panel("TopBar", root, UiTheme.Panel);
-            Ui.Anchor(bar.rectTransform, new Vector2(0.5f, 1f), new Vector2(0, -16), new Vector2(1020, TopBarH));
+            Ui.Anchor(bar.rectTransform, new Vector2(0.5f, 1f), new Vector2(0, -14), new Vector2(1040, TopBarH));
 
-            // Halo dorado suave detrás del contador principal
+            // Fila 1: halo + [icono, número] como grupo centrado
             var glow = Ui.Panel("EssenceGlow", bar.transform,
                 new Color(UiTheme.Gold.r, UiTheme.Gold.g, UiTheme.Gold.b, 0.10f));
             glow.raycastTarget = false;
-            Ui.Anchor(glow.rectTransform, new Vector2(0.5f, 1f), new Vector2(0, -32), new Vector2(560, 118));
+            Ui.Anchor(glow.rectTransform, new Vector2(0.5f, 1f), new Vector2(0, -18), new Vector2(560, 104));
 
             var essenceIcon = Ui.Panel("EssenceIcon", bar.transform, UiTheme.Gold);
             essenceIcon.sprite = UiTheme.Circle();
             essenceIcon.type = Image.Type.Simple;
-            Ui.Anchor(essenceIcon.rectTransform, new Vector2(0.5f, 1f), new Vector2(-210, -55), new Vector2(52, 52));
+            Ui.Anchor(essenceIcon.rectTransform, new Vector2(0.5f, 1f), new Vector2(-200, -44), new Vector2(50, 50));
 
-            essenceText = Ui.Label("Essence", bar.transform, "0", 78, UiTheme.Gold,
+            essenceText = Ui.Label("Essence", bar.transform, "0", 72, UiTheme.Gold,
                                    TextAnchor.MiddleCenter, FontStyle.Bold);
-            Ui.Anchor(essenceText.rectTransform, new Vector2(0.5f, 1f), new Vector2(30, -55), new Vector2(400, 90));
+            Ui.Anchor(essenceText.rectTransform, new Vector2(0.5f, 1f), new Vector2(28, -44), new Vector2(380, 80));
 
-            essenceCaption = Ui.Label("EssenceCaption", bar.transform, Loc.T("ui_esencia"), 34,
+            // Fila 2: subtítulo con aire propio (sin pisar el número)
+            essenceCaption = Ui.Label("EssenceCaption", bar.transform, Loc.T("ui_esencia"), 30,
                                       UiTheme.TextDim);
-            Ui.Anchor(essenceCaption.rectTransform, new Vector2(0.5f, 1f), new Vector2(0, -122), new Vector2(1000, 40));
+            Ui.Anchor(essenceCaption.rectTransform, new Vector2(0.5f, 1f), new Vector2(0, -136), new Vector2(1000, 38));
 
-            float slot = 1020f / BaseElements.Length;
+            // Fila 3: 4 columnas de elementos (icono arriba, cantidad debajo)
+            float slot = 1040f / BaseElements.Length;
             for (int i = 0; i < BaseElements.Length; i++)
             {
                 var el = BaseElements[i];
                 var def = ElementCatalog.Get(el);
-                float cx = -510 + slot * (i + 0.5f);
+                float cx = -520 + slot * (i + 0.5f);
 
                 var dot = Ui.Panel("Dot_" + el, bar.transform, UiTheme.ElementColor(def.ColorHex));
                 dot.sprite = ProceduralIcons.For(el);
                 dot.type = Image.Type.Simple;
-                Ui.Anchor(dot.rectTransform, new Vector2(0.5f, 0f), new Vector2(cx, 92), new Vector2(44, 44));
+                Ui.Anchor(dot.rectTransform, new Vector2(0.5f, 0f), new Vector2(cx, 88), new Vector2(46, 46));
 
-                var counter = Ui.Label("Count_" + el, bar.transform, "0", 38, UiTheme.TextMain,
+                var counter = Ui.Label("Count_" + el, bar.transform, "0", 36, UiTheme.TextMain,
                                        TextAnchor.MiddleCenter);
-                Ui.Anchor(counter.rectTransform, new Vector2(0.5f, 0f), new Vector2(cx, 44), new Vector2(slot - 10, 44));
+                Ui.Anchor(counter.rectTransform, new Vector2(0.5f, 0f), new Vector2(cx, 40), new Vector2(slot - 12, 42));
                 baseCounters[el] = counter;
             }
         }
@@ -270,7 +272,7 @@ namespace Athanor.UI
         void BuildNav()
         {
             var nav = Ui.Panel("Nav", root, UiTheme.Panel);
-            Ui.Anchor(nav.rectTransform, new Vector2(0.5f, 0f), new Vector2(0, 0), new Vector2(1060, NavH - 10));
+            Ui.Anchor(nav.rectTransform, new Vector2(0.5f, 0f), new Vector2(0, 0), new Vector2(1040, NavH - 10));
 
             RegisterTab(nav.transform, "lab", lab.Root);
             RegisterTab(nav.transform, "ayudantes", generators.Root);
@@ -310,7 +312,7 @@ namespace Athanor.UI
 
             var label = Ui.Label("Label", bg.transform, Loc.T("ui_tab_" + key), 22,
                                  UiTheme.TextMain, TextAnchor.MiddleCenter, FontStyle.Bold);
-            Ui.Anchor(label.rectTransform, new Vector2(0.5f, 0f), new Vector2(0, 8), new Vector2(170, 32));
+            Ui.Anchor(label.rectTransform, new Vector2(0.5f, 0f), new Vector2(0, 8), new Vector2(158, 32));
 
             tabs.Add(new TabEntry
             {
@@ -321,14 +323,14 @@ namespace Athanor.UI
 
         void LayoutTabs(RectTransform nav)
         {
-            float w = 1040f / tabs.Count;
+            float w = 1020f / tabs.Count;
             for (int i = 0; i < tabs.Count; i++)
             {
                 var rt = tabs[i].Bg.rectTransform;
                 rt.anchorMin = rt.anchorMax = new Vector2(0f, 0.5f);
                 rt.pivot = new Vector2(0f, 0.5f);
                 rt.anchoredPosition = new Vector2(10 + i * w, 0);
-                rt.sizeDelta = new Vector2(w - 10, NavH - 34);
+                rt.sizeDelta = new Vector2(w - 8, NavH - 34);
             }
         }
 

@@ -37,7 +37,9 @@ namespace Athanor.Game
             var scaler = canvasGo.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1080, 1920);
-            scaler.matchWidthOrHeight = 0.5f;
+            // Portrait: fijar SIEMPRE 1080 unidades de ancho; el alto sobrante queda libre.
+            // (Con 0.5, en pantallas 20:9 como Pixel 8 Pro el ancho útil caía a ~965 y la UI se cortaba.)
+            scaler.matchWidthOrHeight = 0f;
             canvasGo.AddComponent<GraphicRaycaster>();
 
             // Fondo del laboratorio: degradado vertical sutil, flat

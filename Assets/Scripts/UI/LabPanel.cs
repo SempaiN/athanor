@@ -63,13 +63,14 @@ namespace Athanor.UI
             Ui.Anchor(icon.rectTransform, new Vector2(0f, 0.5f), new Vector2(26, 0), new Vector2(34, 34));
             icon.rectTransform.localRotation = Quaternion.Euler(0, 0, 45);
 
-            missionText = Ui.Label("Text", card.transform, "", 30, UiTheme.TextMain,
+            missionText = Ui.Label("Text", card.transform, "", 28, UiTheme.TextMain,
                                    TextAnchor.MiddleLeft);
-            Ui.Anchor(missionText.rectTransform, new Vector2(0f, 0.5f), new Vector2(84, 0), new Vector2(690, 84));
+            missionText.horizontalOverflow = HorizontalWrapMode.Wrap;
+            Ui.Anchor(missionText.rectTransform, new Vector2(0f, 0.5f), new Vector2(80, 0), new Vector2(700, 84));
 
             missionReward = Ui.Label("Reward", card.transform, "", 30, UiTheme.Gold,
                                      TextAnchor.MiddleRight, FontStyle.Bold);
-            Ui.Anchor(missionReward.rectTransform, new Vector2(1f, 0.5f), new Vector2(-24, 0), new Vector2(210, 84));
+            Ui.Anchor(missionReward.rectTransform, new Vector2(1f, 0.5f), new Vector2(-28, 0), new Vector2(190, 84));
         }
 
         Image ring;
@@ -87,7 +88,7 @@ namespace Athanor.UI
             if (ring != null)
             {
                 var c = ring.color;
-                c.a = 0.13f + 0.06f * (0.5f + 0.5f * Mathf.Sin(breathePhase * 1.1f));
+                c.a = 0.06f + 0.04f * (0.5f + 0.5f * Mathf.Sin(breathePhase * 1.1f));
                 ring.color = c;
             }
             if (liquidRt != null)
@@ -130,11 +131,12 @@ namespace Athanor.UI
 
         void BuildFlask()
         {
-            var ringImg = Ui.Panel("Ring", Root, new Color(UiTheme.Amber.r, UiTheme.Amber.g, UiTheme.Amber.b, 0.16f));
+            // Aro sutil (muy tenue: si es demasiado opaco el conjunto se ve "barro")
+            var ringImg = Ui.Panel("Ring", Root, new Color(UiTheme.Amber.r, UiTheme.Amber.g, UiTheme.Amber.b, 0.08f));
             ringImg.sprite = UiTheme.Circle();
             ringImg.type = Image.Type.Simple;
             ringImg.raycastTarget = false;
-            Ui.Place(ringImg.rectTransform, 0, 90, 640, 640);
+            Ui.Place(ringImg.rectTransform, 0, 90, 600, 600);
             ring = ringImg;
 
             // Matraz Erlenmeyer procedural: líquido debajo, vidrio encima, brillo diagonal
@@ -156,7 +158,8 @@ namespace Athanor.UI
             surface.raycastTarget = false;
             Ui.Place(surface.rectTransform, 0, -14, 168, 22);
 
-            var glass = Ui.Panel("Glass", flask, new Color(UiTheme.Amber.r, UiTheme.Amber.g, UiTheme.Amber.b, 0.35f), rounded: false);
+            // Vidrio más claro y limpio (menos "marrón" sobre el fondo oscuro)
+            var glass = Ui.Panel("Glass", flask, new Color(0.97f, 0.78f, 0.45f, 0.52f), rounded: false);
             glass.sprite = UiTheme.FlaskGlass();
             glass.type = Image.Type.Simple;
             Ui.Fill(glass.rectTransform);

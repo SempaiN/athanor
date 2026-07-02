@@ -37,21 +37,21 @@ namespace Athanor.UI
             var piso = Prop("Piso");
             var pisoImg = Ui.Panel("Suelo", piso.transform, new Color(0f, 0f, 0f, 0.28f), rounded: false);
             pisoImg.raycastTarget = false;
-            Ui.Anchor(pisoImg.rectTransform, new Vector2(0.5f, 0f), new Vector2(0, 0), new Vector2(1400, 200));
+            Ui.Anchor(pisoImg.rectTransform, new Vector2(0.5f, 0f), new Vector2(0, 0), new Vector2(1080, 200));
             var zocalo = Ui.Panel("Zocalo", piso.transform,
                 new Color(UiTheme.Amber.r, UiTheme.Amber.g, UiTheme.Amber.b, 0.12f), rounded: false);
             zocalo.raycastTarget = false;
-            Ui.Anchor(zocalo.rectTransform, new Vector2(0.5f, 0f), new Vector2(0, 200), new Vector2(1400, 5));
+            Ui.Anchor(zocalo.rectTransform, new Vector2(0.5f, 0f), new Vector2(0, 200), new Vector2(1080, 5));
 
             // Mesa (siempre visible): franja inferior
             mesa = Prop("Mesa");
             var mesaImg = Ui.Panel("Tabla", mesa.transform, wood, rounded: false);
-            Ui.Anchor(mesaImg.rectTransform, new Vector2(0.5f, 0f), new Vector2(0, 180), new Vector2(1200, 46));
+            Ui.Anchor(mesaImg.rectTransform, new Vector2(0.5f, 0f), new Vector2(0, 180), new Vector2(1080, 46));
             mesaImg.raycastTarget = false;
 
             // Estantería izquierda + 3 frascos — hito: 1er generador
             estanteriaIzq = Prop("EstanteriaIzq");
-            Shelf(estanteriaIzq.transform, -430, 520, woodLight,
+            Shelf(estanteriaIzq.transform, -380, 520, woodLight,
                   new[] { UiTheme.ElementColor("#7FB069"), UiTheme.ElementColor("#3D9BB3"), UiTheme.ElementColor("#E4572E") });
 
             // Alambique derecha — hito: los 6 compuestos T1 descubiertos
@@ -67,7 +67,7 @@ namespace Athanor.UI
 
             // Estantería derecha — hito: 10 generadores
             estanteriaDer = Prop("EstanteriaDer");
-            Shelf(estanteriaDer.transform, 430, 520, woodLight,
+            Shelf(estanteriaDer.transform, 380, 520, woodLight,
                   new[] { UiTheme.ElementColor("#E8C547"), UiTheme.ElementColor("#9B72CF"), UiTheme.ElementColor("#B59F7E") });
 
             // Símbolos de pared — hito: Tria Prima (azufre, mercurio y sal de verdad)
