@@ -25,12 +25,17 @@ portrait, en español. Hecho con Unity 6.3 LTS (6000.3.19f1).
 
 Cada etapa termina en un APK instalable publicado como GitHub Release.
 
-## Instalación en el celular (una vez que haya releases)
+## Instalación en el celular
 
-1. En el celular, abrí la página de **Releases** de este repo y descargá el `.apk` más nuevo.
+**Link directo a la última versión:**
+https://github.com/SempaiN/athanor/releases/latest/download/athanor.apk
+
+1. Abrí ese link en el navegador del celular y descargá el `.apk`.
 2. Al abrir el archivo, Android va a pedir permiso para "instalar apps desconocidas" desde el
    navegador → **Permitir** (es un permiso por app, una sola vez).
 3. Tocá **Instalar**. Listo. Las versiones nuevas se instalan encima sin perder el guardado.
+
+Todas las versiones: https://github.com/SempaiN/athanor/releases
 
 ## Datos técnicos
 
