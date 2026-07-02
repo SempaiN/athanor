@@ -291,6 +291,7 @@ namespace Athanor.Game
         public (BuffDef buff, double gained) TapGoldenFlask()
         {
             var buff = BuffCatalog.Roll(UnityEngine.Random.value);
+            State.GoldenTaps++;
             double gained = BuffCatalog.Apply(State, buff, EssencePerSecond());
             AudioManager.Instance?.Discover();
             Vibrate();

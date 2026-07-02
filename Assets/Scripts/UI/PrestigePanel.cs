@@ -27,24 +27,42 @@ namespace Athanor.UI
             Root = Ui.Rect("PrestigePanel", parent);
             Ui.Fill(Root);
 
+            // Cabecera ilustrada (Canva) con recorte por máscara; sin ella, layout clásico
+            float yOff = 0;
+            var bannerSprite = Resources.Load<Sprite>("Art/Core/gran_obra");
+            if (bannerSprite != null)
+            {
+                var frame = Ui.Panel("BannerFrame", Root, UiTheme.Card);
+                Ui.Anchor(frame.rectTransform, new Vector2(0.5f, 1f), new Vector2(0, -8), new Vector2(980, 300));
+                frame.gameObject.AddComponent<UnityEngine.UI.RectMask2D>();
+
+                var art = Ui.Panel("Art", frame.transform, Color.white, rounded: false);
+                art.sprite = bannerSprite;
+                art.type = Image.Type.Simple;
+                art.raycastTarget = false;
+                Ui.Place(art.rectTransform, 0, 30, 980, 551); // 16:9 recortado a franja
+
+                yOff = 310;
+            }
+
             var orb = Ui.Panel("Orb", Root, UiTheme.Violet);
             orb.sprite = UiTheme.Circle();
             orb.type = Image.Type.Simple;
             orb.raycastTarget = false;
-            Ui.Anchor(orb.rectTransform, new Vector2(0.5f, 1f), new Vector2(0, -50), new Vector2(180, 180));
+            Ui.Anchor(orb.rectTransform, new Vector2(0.5f, 1f), new Vector2(0, -50 - yOff), new Vector2(150, 150));
 
-            quintText = Ui.Label("Quint", Root, "0", 72, UiTheme.Violet,
+            quintText = Ui.Label("Quint", Root, "0", 68, UiTheme.Violet,
                                  TextAnchor.MiddleCenter, FontStyle.Bold);
-            Ui.Anchor(quintText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0, -250), new Vector2(600, 84));
+            Ui.Anchor(quintText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0, -216 - yOff), new Vector2(600, 80));
 
-            var caption = Ui.Label("Caption", Root, Loc.T("ui_quintaesencia"), 34, UiTheme.TextDim);
-            Ui.Anchor(caption.rectTransform, new Vector2(0.5f, 1f), new Vector2(0, -330), new Vector2(600, 40));
+            var caption = Ui.Label("Caption", Root, Loc.T("ui_quintaesencia"), 32, UiTheme.TextDim);
+            Ui.Anchor(caption.rectTransform, new Vector2(0.5f, 1f), new Vector2(0, -290 - yOff), new Vector2(600, 38));
 
-            bonusText = Ui.Label("Bonus", Root, "", 38, UiTheme.TextMain);
-            Ui.Anchor(bonusText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0, -400), new Vector2(900, 48));
+            bonusText = Ui.Label("Bonus", Root, "", 34, UiTheme.TextMain);
+            Ui.Anchor(bonusText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0, -348 - yOff), new Vector2(900, 44));
 
-            reqText = Ui.Label("Reqs", Root, "", 32, UiTheme.TextDim, TextAnchor.UpperCenter);
-            Ui.Anchor(reqText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0, -470), new Vector2(920, 130));
+            reqText = Ui.Label("Reqs", Root, "", 30, UiTheme.TextDim, TextAnchor.UpperCenter);
+            Ui.Anchor(reqText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0, -404 - yOff), new Vector2(920, 124));
 
             gainText = Ui.Label("Gain", Root, "", 40, UiTheme.Gold, TextAnchor.MiddleCenter, FontStyle.Bold);
             Ui.Anchor(gainText.rectTransform, new Vector2(0.5f, 0f), new Vector2(0, 240), new Vector2(900, 60));

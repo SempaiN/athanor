@@ -36,6 +36,7 @@ namespace Athanor.Domain
         public bool VibrateOn;              // háptica en logros/prestigio (default off)
         public string ActiveBuffId = "";    // buff del Matraz Dorado en curso
         public double BuffSecondsLeft;
+        public long GoldenTaps;             // matraces dorados atrapados (stats + logros)
 
         public double BalanceOf(ElementId id) =>
             Balances.TryGetValue(id, out var v) ? v : 0;

@@ -59,6 +59,7 @@ namespace Athanor.Infra
         public bool vibrateOn;
         public string activeBuffId = "";
         public double buffSecondsLeft;
+        public long goldenTaps;
 
         public List<string> elementIds = new List<string>();
         public List<double> elementAmounts = new List<double>();
@@ -89,6 +90,7 @@ namespace Athanor.Infra
                 vibrateOn = s.VibrateOn,
                 activeBuffId = s.ActiveBuffId,
                 buffSecondsLeft = s.BuffSecondsLeft,
+                goldenTaps = s.GoldenTaps,
             };
             foreach (var kv in s.Balances) { d.elementIds.Add(kv.Key.ToString()); d.elementAmounts.Add(kv.Value); }
             foreach (var e in s.Discovered) d.discovered.Add(e.ToString());
@@ -119,6 +121,7 @@ namespace Athanor.Infra
                 VibrateOn = vibrateOn,
                 ActiveBuffId = activeBuffId ?? "",
                 BuffSecondsLeft = buffSecondsLeft,
+                GoldenTaps = goldenTaps,
             };
             for (int i = 0; i < elementIds.Count && i < elementAmounts.Count; i++)
                 if (Enum.TryParse(elementIds[i], out ElementId id))

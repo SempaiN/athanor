@@ -142,6 +142,7 @@ namespace Athanor.UI
                 Loc.T("ui_stat_esencia") + ": " + NumberFormat.Fmt(s.LifetimeEssence) + "\n" +
                 Loc.T("ui_stat_elementos") + ": " + s.Discovered.Count + "/" + ElementCatalog.Elements.Count + "\n" +
                 Loc.T("ui_stat_logros") + ": " + s.AchievementsUnlocked.Count + "/" + AchievementCatalog.All.Count + "\n" +
+                Loc.T("ui_stat_dorados") + ": " + s.GoldenTaps + "\n" +
                 Loc.T("ui_prestigios") + ": " + s.PrestigeCount + "  ·  " +
                 Loc.T("ui_quintaesencia") + ": " + NumberFormat.Fmt(s.Quintessence);
         }

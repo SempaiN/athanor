@@ -55,6 +55,10 @@ namespace Athanor.Domain
             A("sp_piedra", "Magnum Opus",        "crear la Piedra Filosofal",     0.05, s => s.Discovered.Contains(ElementId.PiedraFilosofal)),
             A("sp_quint",  "Alma quintaesencia", "10 de Quintaesencia",           0.05, s => s.Quintessence >= 10),
             A("sp_click5", "Manos doradas",      "Poder de click nivel 6",        0.02, s => s.ClickPowerLevel >= 5),
+            // Matraz Dorado
+            A("gold_1",  "Reflejo dorado",  "atrapar 1 Matraz Dorado",    0.01, s => s.GoldenTaps >= 1),
+            A("gold_10", "Cazador dorado",  "atrapar 10 Matraces Dorados", 0.02, s => s.GoldenTaps >= 10),
+            A("gold_50", "Bendición áurea", "atrapar 50 Matraces Dorados", 0.05, s => s.GoldenTaps >= 50),
         };
 
         /// Bonus total de los logros ya desbloqueados.
