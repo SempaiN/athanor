@@ -57,6 +57,8 @@ namespace Athanor.Infra
         public float musicVolMinus;
         public float sfxVolMinus;
         public bool vibrateOn;
+        public string activeBuffId = "";
+        public double buffSecondsLeft;
 
         public List<string> elementIds = new List<string>();
         public List<double> elementAmounts = new List<double>();
@@ -85,6 +87,8 @@ namespace Athanor.Infra
                 musicVolMinus = 1f - s.MusicVolume,
                 sfxVolMinus = 1f - s.SfxVolume,
                 vibrateOn = s.VibrateOn,
+                activeBuffId = s.ActiveBuffId,
+                buffSecondsLeft = s.BuffSecondsLeft,
             };
             foreach (var kv in s.Balances) { d.elementIds.Add(kv.Key.ToString()); d.elementAmounts.Add(kv.Value); }
             foreach (var e in s.Discovered) d.discovered.Add(e.ToString());
@@ -113,6 +117,8 @@ namespace Athanor.Infra
                 MusicVolume = Mathf.Clamp01(1f - musicVolMinus),
                 SfxVolume = Mathf.Clamp01(1f - sfxVolMinus),
                 VibrateOn = vibrateOn,
+                ActiveBuffId = activeBuffId ?? "",
+                BuffSecondsLeft = buffSecondsLeft,
             };
             for (int i = 0; i < elementIds.Count && i < elementAmounts.Count; i++)
                 if (Enum.TryParse(elementIds[i], out ElementId id))

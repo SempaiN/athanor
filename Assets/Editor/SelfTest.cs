@@ -33,7 +33,9 @@ namespace Athanor.EditorTools
                 TransmuteRules();
                 GeneratorRules();
                 UpgradeRules();
+                BuffRules();
                 PrestigeRules();
+                BalanceSimulation();
                 OfflineRules();
                 AchievementRules();
                 MissionRules();
@@ -311,6 +313,108 @@ namespace Athanor.EditorTools
             // El último objetivo cierra la cadena
             s.MissionIndex = MissionCatalog.All.Count;
             Check(MissionCatalog.Current(s) == null, "cadena terminada = null");
+        }
+
+        static void BuffRules()
+        {
+            Check(BuffCatalog.All.Count == 3, "3 buffs");
+            Check(Math.Abs(BuffCatalog.Roll(0.0).Weight - 45) < 1e-9, "roll 0 → frenesí");
+            Check(BuffCatalog.Roll(0.999).Duration == 0, "roll alto → fortuna");
+
+            var s = new GameState();
+            Check(BuffCatalog.ProdMult(s) == 1 && BuffCatalog.ClickMult(s) == 1, "sin buff = x1");
+
+            var frenesi = BuffCatalog.Get("frenesi");
+            BuffCatalog.Apply(s, frenesi, 0);
+            Check(Math.Abs(s.GlobalMultiplier(0) - 7) < 1e-9, "frenesí x7 en producción");
+            Check(!BuffCatalog.Tick(s, 30), "no expira a mitad");
+            Check(BuffCatalog.Tick(s, 31), "expira al agotar");
+            Check(s.ActiveBuffId == "" && BuffCatalog.ProdMult(s) == 1, "limpio tras expirar");
+
+            s.Essence = 1000;
+            s.LifetimeEssence = 1000;
+            var fortuna = BuffCatalog.Get("fortuna");
+            double gained = BuffCatalog.Apply(s, fortuna, 10); // 10% de 1000 + 30*10 = 400
+            Check(Math.Abs(gained - 400) < 1e-6 && Math.Abs(s.Essence - 1400) < 1e-6, "fortuna instantánea");
+
+            var fiebre = BuffCatalog.Get("fiebre");
+            BuffCatalog.Apply(s, fiebre, 0);
+            Check(Math.Abs(GameRules.ClickYield(s, 0) - 7) < 1e-9, "fiebre x7 en click");
+        }
+
+        /// Bot greedy que juega 2 h simuladas: valida la economía de punta a punta.
+        static void BalanceSimulation()
+        {
+            var s = new GameState();
+            double firstPrestigeAt = -1;
+            const double dt = 1.0;
+            const int hours = 2;
+
+            for (int t = 0; t < hours * 3600; t++)
+            {
+                // 2 clicks por segundo
+                GameRules.ApplyClick(s, 0);
+                GameRules.ApplyClick(s, 0);
+
+                GeneratorCatalog.Tick(s, dt, 0);
+
+                if (t % 5 == 0)
+                {
+                    // 1) Combinar solo con excedente (deja reserva para seguir vendiendo)
+                    foreach (var r in ElementCatalog.Recipes.OrderByDescending(r => ElementCatalog.Get(r.Output).Tier))
+                    {
+                        int safety = 0;
+                        while (s.BalanceOf(r.InputA) > r.UnitsPerInput * 3 &&
+                               s.BalanceOf(r.InputB) > r.UnitsPerInput * 3 &&
+                               GameRules.CanCombine(s, r) && safety++ < 20)
+                            GameRules.Combine(s, r);
+                    }
+
+                    // 2) Vender el excedente de todo (reserva 60 de lo que sirve de insumo)
+                    foreach (var def in ElementCatalog.Elements)
+                    {
+                        bool isInput = ElementCatalog.Recipes.Any(r => r.InputA == def.Id || r.InputB == def.Id);
+                        double reserve = isInput ? 60 : 0;
+                        double excess = s.BalanceOf(def.Id) - reserve;
+                        if (excess > 0 && def.Id != ElementId.PiedraFilosofal)
+                            GameRules.Transmute(s, def.Id, excess);
+                    }
+
+                    // 3) Mejorar el click cuando sobra (x2 por nivel: motor del early game)
+                    double upCost = 50 * Math.Pow(4, s.ClickPowerLevel);
+                    if (s.Essence > upCost * 2)
+                    {
+                        s.Essence -= upCost;
+                        s.ClickPowerLevel++;
+                    }
+
+                    // 4) Comprar generadores mientras alcance (el más barato primero)
+                    for (int buys = 0; buys < 25; buys++)
+                    {
+                        GeneratorDef best = null;
+                        double bestCost = double.MaxValue;
+                        foreach (var g in GeneratorCatalog.Generators)
+                        {
+                            double cost = GameRules.GeneratorCost(g.BaseCost,
+                                s.GeneratorsOwned.TryGetValue(g.Id, out var n) ? n : 0);
+                            if (cost <= s.Essence && cost < bestCost) { best = g; bestCost = cost; }
+                        }
+                        if (best == null) break;
+                        s.Essence -= bestCost;
+                        s.GeneratorsOwned[best.Id] = (s.GeneratorsOwned.TryGetValue(best.Id, out var m) ? m : 0) + 1;
+                    }
+                }
+
+                if (firstPrestigeAt < 0 && GameRules.CanPrestige(s))
+                    firstPrestigeAt = t / 60.0;
+            }
+
+            Debug.Log($"[SelfTest] Sim 2h: esencia hist. {s.LifetimeEssence:E2}, " +
+                      $"descubiertos {s.Discovered.Count}/20, " +
+                      (firstPrestigeAt > 0 ? $"prestigio a los {firstPrestigeAt:F0} min" : "prestigio NO alcanzado"));
+
+            Check(s.LifetimeEssence >= 1e6, "sim: 1M de esencia histórica en 2h");
+            Check(s.Discovered.Count >= 14, $"sim: descubrir la mayoría del árbol (dio {s.Discovered.Count})");
         }
 
         static void SaveRoundtrip()

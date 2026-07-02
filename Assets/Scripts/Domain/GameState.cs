@@ -34,6 +34,8 @@ namespace Athanor.Domain
         public float MusicVolume = 1f;      // 0..1
         public float SfxVolume = 1f;        // 0..1
         public bool VibrateOn;              // háptica en logros/prestigio (default off)
+        public string ActiveBuffId = "";    // buff del Matraz Dorado en curso
+        public double BuffSecondsLeft;
 
         public double BalanceOf(ElementId id) =>
             Balances.TryGetValue(id, out var v) ? v : 0;
@@ -45,8 +47,9 @@ namespace Athanor.Domain
                 Discovered.Add(id);
         }
 
-        /// Multiplicador global de producción: prestigio + logros + mejoras compradas.
+        /// Multiplicador global de producción: prestigio + logros + mejoras + buff activo.
         public double GlobalMultiplier(double achievementBonus) =>
-            (1.0 + 0.10 * Quintessence) * (1.0 + achievementBonus) * UpgradeCatalog.ProdMult(this);
+            (1.0 + 0.10 * Quintessence) * (1.0 + achievementBonus)
+            * UpgradeCatalog.ProdMult(this) * BuffCatalog.ProdMult(this);
     }
 }

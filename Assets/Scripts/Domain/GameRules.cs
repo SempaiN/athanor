@@ -15,7 +15,7 @@ namespace Athanor.Domain
         /// Unidades de cada elemento base que otorga un click.
         public static double ClickYield(GameState s, double achievementBonus) =>
             Math.Pow(2, s.ClickPowerLevel) * s.GlobalMultiplier(achievementBonus)
-            * UpgradeCatalog.ClickMult(s);
+            * UpgradeCatalog.ClickMult(s) * BuffCatalog.ClickMult(s);
 
         public static void ApplyClick(GameState s, double achievementBonus)
         {

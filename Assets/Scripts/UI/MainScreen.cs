@@ -77,6 +77,7 @@ namespace Athanor.UI
             settings.Build(contentArea);
 
             BuildNav();
+            BuildBuffPill();
             ShowTab("lab");
             game.ElementDiscovered += OnElementDiscovered;
             game.AchievementUnlocked += OnAchievementUnlocked;
@@ -88,10 +89,83 @@ namespace Athanor.UI
             if (game.OfflineGain > 0) ShowOfflinePopup(game.OfflineGain);
         }
 
+        // ---- Matraz Dorado (inspiración: Golden Cookie) ----
+
+        float goldenTimer;
+        float goldenNextIn = -1;
+        GameObject goldenGo;
+        Image buffPillBg;
+        Text buffPillText;
+
         void Update()
         {
             if (lab != null && lab.Root.gameObject.activeSelf)
                 lab.Tick(Time.deltaTime);
+
+            if (goldenNextIn < 0) goldenNextIn = Random.Range(60f, 140f); // primera aparición
+            if (goldenGo == null)
+            {
+                goldenTimer += Time.deltaTime;
+                if (goldenTimer >= goldenNextIn) SpawnGolden();
+            }
+        }
+
+        void SpawnGolden()
+        {
+            goldenTimer = 0;
+            goldenNextIn = Random.Range(110f, 280f);
+
+            var img = Ui.Panel("GoldenFlask", contentArea, UiTheme.Gold, rounded: false);
+            img.sprite = UiTheme.FlaskGlass();
+            img.type = Image.Type.Simple;
+            Ui.Place(img.rectTransform,
+                Random.Range(-420f, 420f), Random.Range(-520f, 380f), 110, 110);
+            goldenGo = img.gameObject;
+
+            var btn = img.gameObject.AddComponent<Button>();
+            btn.targetGraphic = img;
+            btn.transition = Selectable.Transition.None;
+            btn.onClick.AddListener(OnGoldenTapped);
+
+            StartCoroutine(GoldenLife(img));
+        }
+
+        System.Collections.IEnumerator GoldenLife(Image img)
+        {
+            const float lifetime = 12f;
+            for (float t = 0; t < lifetime; t += Time.deltaTime)
+            {
+                if (img == null) yield break;
+                float pulse = 1f + 0.10f * Mathf.Sin(t * 5f);
+                img.rectTransform.localScale = Vector3.one * pulse;
+                var c = img.color;
+                c.a = t < 0.4f ? t / 0.4f : (t > lifetime - 1.5f ? (lifetime - t) / 1.5f : 1f);
+                img.color = c;
+                yield return null;
+            }
+            if (img != null) Destroy(img.gameObject);
+        }
+
+        void OnGoldenTapped()
+        {
+            if (goldenGo != null) Destroy(goldenGo);
+            var (buff, gained) = game.TapGoldenFlask();
+            string msg = gained > 0
+                ? buff.Name + "  +" + NumberFormat.Fmt(gained) + " " + Loc.T("ui_esencia")
+                : buff.Name + "  x" + NumberFormat.Fmt(Mathf.Max((float)buff.ProdMult, (float)buff.ClickMult))
+                  + " / " + Mathf.RoundToInt((float)buff.Duration) + "s";
+            StartCoroutine(DiscoveryToast(msg, UiTheme.Gold));
+        }
+
+        void BuildBuffPill()
+        {
+            buffPillBg = Ui.Panel("BuffPill", root, new Color(UiTheme.Gold.r, UiTheme.Gold.g, UiTheme.Gold.b, 0.16f));
+            buffPillBg.raycastTarget = false;
+            Ui.Anchor(buffPillBg.rectTransform, new Vector2(1f, 1f), new Vector2(-24, -TopBarH - 120), new Vector2(380, 56));
+            buffPillText = Ui.Label("Text", buffPillBg.transform, "", 28, UiTheme.Gold,
+                                    TextAnchor.MiddleCenter, FontStyle.Bold);
+            Ui.Fill(buffPillText.rectTransform);
+            buffPillBg.gameObject.SetActive(false);
         }
 
         void OnDestroy()
@@ -382,6 +456,16 @@ namespace Athanor.UI
 
             foreach (var kv in baseCounters)
                 kv.Value.text = NumberFormat.Fmt(s.BalanceOf(kv.Key));
+
+            // Píldora del buff activo
+            var activeBuff = BuffCatalog.Active(s);
+            if (buffPillBg != null)
+            {
+                buffPillBg.gameObject.SetActive(activeBuff != null);
+                if (activeBuff != null)
+                    buffPillText.text = activeBuff.Name + " · " +
+                        Mathf.CeilToInt((float)s.BuffSecondsLeft) + "s";
+            }
 
             if (lab.Root.gameObject.activeSelf) lab.Refresh();
             if (generators.Root.gameObject.activeSelf) generators.Refresh();

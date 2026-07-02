@@ -48,6 +48,8 @@ namespace Athanor.Game
         {
             if (State.LastSeenUnixUtc <= 0) return;
             double away = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - State.LastSeenUnixUtc;
+            // El buff consume su tiempo también estando fuera (evita eps inflado en el cálculo)
+            if (away > 0) BuffCatalog.Tick(State, away);
             if (away < 60) return; // menos de 1 min fuera: nada
             OfflineGain = GameRules.OfflineEssence(State, EssencePerSecond(), away);
             if (OfflineGain > 0)
@@ -57,17 +59,26 @@ namespace Athanor.Game
             }
         }
 
+        public event Action BuffExpired;
+
         void Update()
         {
             double dt = Time.deltaTime;
             State.PlaySeconds += dt;
             bool producing = TickGenerators(dt);
 
+            bool buffActive = State.BuffSecondsLeft > 0;
+            if (BuffCatalog.Tick(State, dt))
+            {
+                BuffExpired?.Invoke();
+                StateChanged?.Invoke();
+            }
+
             uiTimer += Time.deltaTime;
             if (uiTimer >= UiRefreshSeconds)
             {
                 uiTimer = 0;
-                if (producing) StateChanged?.Invoke();
+                if (producing || buffActive) StateChanged?.Invoke();
             }
 
             achievementTimer += Time.deltaTime;
@@ -161,6 +172,8 @@ namespace Athanor.Game
             // Volviendo de background: otorgar lo generado mientras tanto
             if (State.LastSeenUnixUtc <= 0) return;
             double away = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - State.LastSeenUnixUtc;
+            // El buff también consume tiempo en background (si no, x7 inflaría el cálculo)
+            if (away > 0) BuffCatalog.Tick(State, away);
             if (away < 60) return;
             double gain = GameRules.OfflineEssence(State, EssencePerSecond(), away);
             State.LastSeenUnixUtc = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
@@ -270,6 +283,19 @@ namespace Athanor.Game
             AudioManager.Instance?.Buy();
             StateChanged?.Invoke();
             return true;
+        }
+
+        // ---- Matraz Dorado ----
+
+        /// Aplica un buff sorteado. Devuelve el buff y, si fue instantáneo, la esencia ganada.
+        public (BuffDef buff, double gained) TapGoldenFlask()
+        {
+            var buff = BuffCatalog.Roll(UnityEngine.Random.value);
+            double gained = BuffCatalog.Apply(State, buff, EssencePerSecond());
+            AudioManager.Instance?.Discover();
+            Vibrate();
+            StateChanged?.Invoke();
+            return (buff, gained);
         }
 
         // ---- Prestigio: La Gran Obra ----
