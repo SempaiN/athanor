@@ -1,0 +1,51 @@
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
+using Athanor.UI;
+
+namespace Athanor.Game
+{
+    /// Arranque 100% por código: cámara, EventSystem, Canvas y pantalla principal.
+    /// La escena puede estar vacía; todo se construye acá.
+    public static class Bootstrap
+    {
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        static void Init()
+        {
+            // Cámara (solo limpia el fondo; la UI es ScreenSpaceOverlay)
+            var camGo = new GameObject("Camera");
+            var cam = camGo.AddComponent<Camera>();
+            cam.clearFlags = CameraClearFlags.SolidColor;
+            cam.backgroundColor = UiTheme.Background;
+            cam.cullingMask = 0;
+
+            // Input para uGUI
+            var esGo = new GameObject("EventSystem");
+            esGo.AddComponent<EventSystem>();
+            esGo.AddComponent<StandaloneInputModule>();
+
+            // Controlador del juego
+            var gameGo = new GameObject("GameController");
+            Object.DontDestroyOnLoad(gameGo);
+            gameGo.AddComponent<GameController>();
+
+            // Canvas raíz (referencia 1080×1920 portrait)
+            var canvasGo = new GameObject("Canvas");
+            var canvas = canvasGo.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            var scaler = canvasGo.AddComponent<CanvasScaler>();
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(1080, 1920);
+            scaler.matchWidthOrHeight = 0.5f;
+            canvasGo.AddComponent<GraphicRaycaster>();
+
+            // Fondo del laboratorio (por ahora, color plano)
+            var bg = Ui.Panel("Background", canvas.transform, UiTheme.Background, rounded: false);
+            bg.raycastTarget = false;
+            Ui.Fill(bg.rectTransform);
+
+            // Pantalla principal
+            canvasGo.AddComponent<MainScreen>().Build(canvas);
+        }
+    }
+}
