@@ -36,6 +36,7 @@ namespace Athanor.EditorTools
                 PrestigeRules();
                 OfflineRules();
                 AchievementRules();
+                MissionRules();
                 SaveRoundtrip();
                 EconomySanity();
 
@@ -285,6 +286,33 @@ namespace Athanor.EditorTools
             Check(Math.Abs(AchievementCatalog.TotalBonus(s) - 0.01) < 1e-9, "bonus acumulado");
         }
 
+        static void MissionRules()
+        {
+            Check(MissionCatalog.All.Count == 12, "12 objetivos");
+            Check(MissionCatalog.All.Select(m => m.Id).Distinct().Count() == 12, "ids de objetivo únicos");
+            Check(MissionCatalog.All.All(m => m.Reward > 0), "recompensas positivas");
+
+            var s = new GameState();
+            Check(MissionCatalog.Current(s).Id == "m01", "arranca en m01");
+            Check(MissionCatalog.CheckProgress(s).Count == 0, "nada cumplido de inicio");
+
+            // Cumplir m01 encadena m02 (la recompensa de m01 supera el umbral de esencia de m02)
+            s.TotalClicks = 25;
+            var done = MissionCatalog.CheckProgress(s);
+            Check(done.Count == 2 && done[0].Id == "m01" && done[1].Id == "m02",
+                  $"cadena m01+m02 (dio {done.Count})");
+            Check(s.MissionIndex == 2, "índice avanza a 2");
+            Check(Math.Abs(s.Essence - 150) < 1e-9, "recompensas acumuladas 50+100");
+
+            Check(MissionCatalog.Current(s).Id == "m03", "sigue m03");
+            s.GeneratorsOwned["aprendiz"] = 1;
+            Check(MissionCatalog.CheckProgress(s).Count == 1, "m03 al contratar");
+
+            // El último objetivo cierra la cadena
+            s.MissionIndex = MissionCatalog.All.Count;
+            Check(MissionCatalog.Current(s) == null, "cadena terminada = null");
+        }
+
         static void SaveRoundtrip()
         {
             var s = new GameState
@@ -295,6 +323,7 @@ namespace Athanor.EditorTools
                 TotalClicks = 777,
                 PrestigeCount = 2,
                 ClickPowerLevel = 5,
+                MissionIndex = 4,
                 LastSeenUnixUtc = 1712345678,
                 PlaySeconds = 3661.5,
                 HighQualityMode = true,
@@ -329,6 +358,7 @@ namespace Athanor.EditorTools
             Check(back.TotalClicks == 777 && back.PrestigeCount == 2 && back.ClickPowerLevel == 5,
                   "save: contadores");
             Check(Math.Abs(back.PlaySeconds - s.PlaySeconds) < 1e-9, "save: tiempo jugado");
+            Check(back.MissionIndex == 4, "save: objetivo activo");
             Check(back.LastSeenUnixUtc == 1712345678, "save: timestamp");
         }
 

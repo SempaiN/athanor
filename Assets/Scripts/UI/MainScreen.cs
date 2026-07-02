@@ -82,6 +82,7 @@ namespace Athanor.UI
             game.AchievementUnlocked += OnAchievementUnlocked;
             game.Prestiged += OnPrestiged;
             game.OfflineGranted += ShowOfflinePopup;
+            game.MissionCompleted += OnMissionCompleted;
             Refresh();
 
             if (game.OfflineGain > 0) ShowOfflinePopup(game.OfflineGain);
@@ -102,7 +103,15 @@ namespace Athanor.UI
                 game.AchievementUnlocked -= OnAchievementUnlocked;
                 game.Prestiged -= OnPrestiged;
                 game.OfflineGranted -= ShowOfflinePopup;
+                game.MissionCompleted -= OnMissionCompleted;
             }
+        }
+
+        void OnMissionCompleted(MissionDef def)
+        {
+            StartCoroutine(DiscoveryToast(
+                Loc.T("ui_objetivo_ok") + " +" + NumberFormat.Fmt(def.Reward) + " " + Loc.T("ui_esencia"),
+                UiTheme.Green));
         }
 
         void OnAchievementUnlocked(AchievementDef def)

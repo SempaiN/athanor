@@ -206,6 +206,15 @@ namespace Athanor.UI
         {
             decor.Refresh();
             var s = game.State;
+
+            var mission = MissionCatalog.Current(s);
+            missionCard.SetActive(mission != null);
+            if (mission != null)
+            {
+                missionText.text = Loc.T("ui_objetivo") + ": " + mission.Name;
+                missionReward.text = "+" + NumberFormat.Fmt(mission.Reward);
+            }
+
             double sellValue = 0;
             foreach (var def in ElementCatalog.Elements)
                 if (def.Tier == 0)

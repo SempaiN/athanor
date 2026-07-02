@@ -72,6 +72,8 @@ namespace Athanor.Infra
             { "ui_vol_musica", "Música" },
             { "ui_vol_sfx", "Efectos" },
             { "ui_ajuste_vibracion", "Vibración" },
+            { "ui_objetivo", "Objetivo" },
+            { "ui_objetivo_ok", "¡Objetivo cumplido!" },
             { "ui_stats_titulo", "Estadísticas" },
             { "ui_stat_tiempo", "Tiempo jugado" },
             { "ui_stat_clicks", "Toques al matraz" },
