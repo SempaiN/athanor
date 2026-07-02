@@ -42,12 +42,34 @@ namespace Athanor.Game
             scaler.matchWidthOrHeight = 0f;
             canvasGo.AddComponent<GraphicRaycaster>();
 
-            // Fondo del laboratorio: degradado vertical sutil, flat
-            var bg = Ui.Panel("Background", canvas.transform, Color.white, rounded: false);
-            bg.sprite = UiTheme.VerticalGradient();
-            bg.type = Image.Type.Simple;
-            bg.raycastTarget = false;
-            Ui.Fill(bg.rectTransform);
+            // Fondo del laboratorio: ilustración si existe, degradado si no
+            var bgHolder = Ui.Rect("Background", canvas.transform);
+            Ui.Fill(bgHolder);
+            var bakedBg = Resources.Load<Sprite>("Art/Core/lab_fondo");
+            if (bakedBg != null)
+            {
+                var illus = Ui.Panel("Illustration", bgHolder, Color.white, rounded: false);
+                illus.sprite = bakedBg;
+                illus.type = Image.Type.Simple;
+                illus.raycastTarget = false;
+                Ui.Place(illus.rectTransform, 0, 0, 1080, 1920);
+                var fitter = illus.gameObject.AddComponent<AspectRatioFitter>();
+                fitter.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
+                fitter.aspectRatio = 1080f / 1920f;
+
+                // velo oscuro sutil para que la UI y el matraz respiren sobre la ilustración
+                var veil = Ui.Panel("Veil", bgHolder, new Color(0.03f, 0.02f, 0.06f, 0.30f), rounded: false);
+                veil.raycastTarget = false;
+                Ui.Fill(veil.rectTransform);
+            }
+            else
+            {
+                var bg = Ui.Panel("Gradient", bgHolder, Color.white, rounded: false);
+                bg.sprite = UiTheme.VerticalGradient();
+                bg.type = Image.Type.Simple;
+                bg.raycastTarget = false;
+                Ui.Fill(bg.rectTransform);
+            }
 
             // Contenedor ajustado al área segura (notch, barra de gestos)
             var safeRoot = Ui.Rect("SafeArea", canvas.transform);

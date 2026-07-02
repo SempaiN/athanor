@@ -19,6 +19,8 @@ namespace Athanor.EditorTools
         {
             try
             {
+                AssetDatabase.Refresh();
+                AssetBaker.ConfigureImporters();
                 Configure();
                 EnsureScene();
 

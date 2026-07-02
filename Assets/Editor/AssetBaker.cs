@@ -51,6 +51,13 @@ namespace Athanor.EditorTools
             return c;
         }
 
+        /// Texturas de 1024px o más de lado (ilustraciones) — el resto son iconos.
+        static bool IsLarge(string assetPath)
+        {
+            var tex = AssetDatabase.LoadAssetAtPath<Texture2D>(assetPath);
+            return tex != null && Mathf.Max(tex.width, tex.height) >= 1024;
+        }
+
         // ---- Estilo común: degradado vertical + brillo superior + contorno oscuro ----
 
         static Color32 Shade(float d, float aa, Color baseCol, Vector2 p)
@@ -228,7 +235,9 @@ namespace Athanor.EditorTools
             UnityEngine.Object.DestroyImmediate(tex);
         }
 
-        static void ConfigureImporters()
+        /// Deja todo Art/** como Sprite sin compresión (llamado también antes de cada build,
+        /// para que cualquier PNG nuevo soltado a mano quede bien importado).
+        public static void ConfigureImporters()
         {
             foreach (var guid in AssetDatabase.FindAssets("t:Texture2D", new[] { ArtRoot }))
             {
@@ -239,7 +248,11 @@ namespace Athanor.EditorTools
                 imp.spriteImportMode = SpriteImportMode.Single;
                 imp.alphaIsTransparency = true;
                 imp.mipmapEnabled = false;
-                imp.textureCompression = TextureImporterCompression.Uncompressed;
+                // Iconos chicos: sin compresión (nitidez). Ilustraciones grandes: comprimidas
+                // en alta calidad para no inflar el APK (~8 MB una sola a 1080x1920 sin comprimir).
+                imp.textureCompression = imp.maxTextureSize >= 1024 && IsLarge(p)
+                    ? TextureImporterCompression.CompressedHQ
+                    : TextureImporterCompression.Uncompressed;
                 imp.SaveAndReimport();
             }
         }

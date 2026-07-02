@@ -22,6 +22,8 @@ namespace Athanor.UI
         static readonly ElementId[] TriaPrima =
             { ElementId.Sal, ElementId.Mercurio, ElementId.Azufre };
 
+        bool bgIllustrated;
+
         public void Build(RectTransform parent)
         {
             game = GameController.Instance;
@@ -29,10 +31,23 @@ namespace Athanor.UI
             Ui.Fill(root);
             root.SetAsFirstSibling(); // detrás del matraz y los botones
 
+            // Con fondo ilustrado (Canva), la escenografía ya viene pintada:
+            // solo mantenemos los hitos que se superponen bien (círculo y vitral).
+            bgIllustrated = Resources.Load<Sprite>("Art/Core/lab_fondo") != null;
+
             var wood = new Color(0.35f, 0.24f, 0.16f);     // madera oscura flat
             var woodLight = new Color(0.45f, 0.32f, 0.21f);
             var glass = new Color(0.75f, 0.89f, 0.90f, 0.5f);
 
+            if (!bgIllustrated)
+                BuildFlatScenery(wood, woodLight, glass);
+
+            BuildMilestoneOverlays();
+            Refresh();
+        }
+
+        void BuildFlatScenery(Color wood, Color woodLight, Color glass)
+        {
             // Piso (siempre): franja inferior más oscura que da profundidad al laboratorio
             var piso = Prop("Piso");
             var pisoImg = Ui.Panel("Suelo", piso.transform, new Color(0f, 0f, 0f, 0.28f), rounded: false);
@@ -93,6 +108,11 @@ namespace Athanor.UI
             flame.raycastTarget = false;
             Ui.Anchor(flame.rectTransform, new Vector2(0f, 0.5f), new Vector2(64, 250), new Vector2(28, 38));
 
+        }
+
+        // Hitos que funcionan también sobre el fondo ilustrado.
+        void BuildMilestoneOverlays()
+        {
             // Círculo de transmutación completo — hito: Piedra Filosofal
             circulo = Prop("Circulo");
             var ring = Ui.Panel("Aro", circulo.transform, new Color(0.91f, 0.77f, 0.28f, 0.30f));
@@ -117,8 +137,6 @@ namespace Athanor.UI
                 Ui.Anchor(pane.rectTransform, new Vector2(0.5f, 1f), new Vector2((i - 2) * 130, -6), new Vector2(110, 26));
                 vitralPanes[i] = pane;
             }
-
-            Refresh();
         }
 
         GameObject Prop(string name)
@@ -148,21 +166,27 @@ namespace Athanor.UI
             }
         }
 
+        static void Toggle(GameObject go, bool on)
+        {
+            if (go != null) go.SetActive(on);
+        }
+
         public void Refresh()
         {
             var s = game.State;
             int totalGens = s.GeneratorsOwned.Values.Sum();
 
-            estanteriaIzq.SetActive(totalGens >= 1);
-            alambique.SetActive(Tier1.All(e => s.Discovered.Contains(e)));
-            estanteriaDer.SetActive(totalGens >= 10);
-            simbolos.SetActive(TriaPrima.All(e => s.Discovered.Contains(e)));
-            candelabro.SetActive(s.Discovered.Contains(ElementId.Oro));
-            circulo.SetActive(s.Discovered.Contains(ElementId.PiedraFilosofal));
+            Toggle(estanteriaIzq, totalGens >= 1);
+            Toggle(alambique, Tier1.All(e => s.Discovered.Contains(e)));
+            Toggle(estanteriaDer, totalGens >= 10);
+            Toggle(simbolos, TriaPrima.All(e => s.Discovered.Contains(e)));
+            Toggle(candelabro, s.Discovered.Contains(ElementId.Oro));
+            Toggle(circulo, s.Discovered.Contains(ElementId.PiedraFilosofal));
 
-            vitral.SetActive(s.PrestigeCount >= 1);
-            for (int i = 0; i < vitralPanes.Length; i++)
-                vitralPanes[i].gameObject.SetActive(s.PrestigeCount > i);
+            Toggle(vitral, s.PrestigeCount >= 1);
+            if (vitral != null)
+                for (int i = 0; i < vitralPanes.Length; i++)
+                    vitralPanes[i].gameObject.SetActive(s.PrestigeCount > i);
         }
     }
 }
