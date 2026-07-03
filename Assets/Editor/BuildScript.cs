@@ -52,6 +52,63 @@ namespace Athanor.EditorTools
             }
         }
 
+        /// Build AAB firmado para Google Play. Requiere release.keystore en la raíz
+        /// (tools/crear-keystore.bat) y las variables de entorno ATHANOR_KEYSTORE_PASS
+        /// y ATHANOR_KEY_PASS. Desactiva el actualizador de GitHub (símbolo PLAY_STORE).
+        public static void BuildAab()
+        {
+            try
+            {
+                AssetDatabase.Refresh();
+                AssetBaker.ConfigureImporters();
+                Configure();
+                EnsureScene();
+
+                string projectRoot = Directory.GetParent(Application.dataPath).FullName;
+                string keystore = Path.Combine(projectRoot, "release.keystore");
+                string ksPass = Environment.GetEnvironmentVariable("ATHANOR_KEYSTORE_PASS");
+                string keyPass = Environment.GetEnvironmentVariable("ATHANOR_KEY_PASS");
+                if (!File.Exists(keystore) || string.IsNullOrEmpty(ksPass))
+                {
+                    Debug.LogError("[BuildScript] Falta release.keystore o ATHANOR_KEYSTORE_PASS. " +
+                                   "Ver docs/PLAY_STORE.md §2-3.");
+                    EditorApplication.Exit(1);
+                    return;
+                }
+
+                PlayerSettings.Android.useCustomKeystore = true;
+                PlayerSettings.Android.keystoreName = keystore;
+                PlayerSettings.Android.keystorePass = ksPass;
+                PlayerSettings.Android.keyaliasName = "athanor";
+                PlayerSettings.Android.keyaliasPass = string.IsNullOrEmpty(keyPass) ? ksPass : keyPass;
+
+                // Sin actualizador externo en la build de store
+                PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.Android, "PLAY_STORE");
+                EditorUserBuildSettings.buildAppBundle = true;
+
+                string aabPath = Path.Combine(projectRoot, "Builds",
+                    $"athanor-v{Athanor.GameVersion.Version}.aab");
+                Directory.CreateDirectory(Path.GetDirectoryName(aabPath));
+
+                var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
+                {
+                    scenes = new[] { ScenePath },
+                    locationPathName = aabPath,
+                    target = BuildTarget.Android,
+                    options = BuildOptions.None,
+                });
+                bool ok = report.summary.result == UnityEditor.Build.Reporting.BuildResult.Succeeded
+                          && File.Exists(aabPath);
+                Debug.Log($"[BuildScript] AAB: {report.summary.result}, salida: {aabPath}");
+                EditorApplication.Exit(ok ? 0 : 1);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("[BuildScript] Excepción: " + e);
+                EditorApplication.Exit(1);
+            }
+        }
+
         /// Solo configura y guarda la escena (para la primera importación / verificación).
         public static void Prepare()
         {
@@ -88,6 +145,8 @@ namespace Athanor.EditorTools
                 AndroidArchitecture.ARMv7 | AndroidArchitecture.ARM64;
 
             EditorUserBuildSettings.buildAppBundle = false; // APK para sideload/releases
+            // Sin símbolos residuales: PLAY_STORE solo lo agrega BuildAab después
+            PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.Android, string.Empty);
 
             AssetDatabase.SaveAssets();
         }

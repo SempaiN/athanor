@@ -79,8 +79,11 @@ namespace Athanor.Game
             // Pantalla principal
             canvasGo.AddComponent<MainScreen>().Build(safeRoot);
 
-            // Aviso de nueva versión (GitHub Releases) — quitar si se publica en una store
+            // Aviso de nueva versión (GitHub Releases). En el build de Play Store se
+            // compila fuera (símbolo PLAY_STORE): Play prohíbe avisar de updates externos.
+#if !PLAY_STORE
             canvasGo.AddComponent<Athanor.Infra.UpdateChecker>().Init(safeRoot);
+#endif
         }
     }
 }
