@@ -248,6 +248,8 @@ namespace Athanor.EditorTools
                 imp.spriteImportMode = SpriteImportMode.Single;
                 imp.alphaIsTransparency = true;
                 imp.mipmapEnabled = false;
+                // El matraz usa alphaHitTest (toque por silueta): requiere textura legible.
+                imp.isReadable = p.Contains("matraz_");
                 // Iconos chicos: sin compresión (nitidez). Ilustraciones grandes: comprimidas
                 // en alta calidad para no inflar el APK (~8 MB una sola a 1080x1920 sin comprimir).
                 imp.textureCompression = imp.maxTextureSize >= 1024 && IsLarge(p)

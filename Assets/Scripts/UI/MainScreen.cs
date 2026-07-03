@@ -43,6 +43,17 @@ namespace Athanor.UI
         static readonly ElementId[] BaseElements =
             { ElementId.Tierra, ElementId.Agua, ElementId.Fuego, ElementId.Aire };
 
+        /// Ejecuta un paso de construcción aislado: si un panel falla, los demás
+        /// y la navegación se construyen igual (lección del bug del alphaHitTest).
+        static void SafeBuild(string step, System.Action build)
+        {
+            try { build(); }
+            catch (System.Exception e)
+            {
+                Debug.LogError("[UI] Falló construir " + step + ": " + e);
+            }
+        }
+
         public void Build(RectTransform safeRoot)
         {
             root = safeRoot;
@@ -58,23 +69,12 @@ namespace Athanor.UI
             contentArea.offsetMin = new Vector2(0, NavH);
             contentArea.offsetMax = new Vector2(0, -TopBarH - 20);
 
-            lab = new LabPanel(this);
-            lab.Build(contentArea);
-
-            generators = new GeneratorsPanel();
-            generators.Build(contentArea);
-
-            elements = new ElementsPanel();
-            elements.Build(contentArea);
-
-            achievements = new AchievementsPanel();
-            achievements.Build(contentArea);
-
-            prestige = new PrestigePanel(this);
-            prestige.Build(contentArea);
-
-            settings = new SettingsPanel();
-            settings.Build(contentArea);
+            SafeBuild("Laboratorio", () => { lab = new LabPanel(this); lab.Build(contentArea); });
+            SafeBuild("Ayudantes", () => { generators = new GeneratorsPanel(); generators.Build(contentArea); });
+            SafeBuild("Elementos", () => { elements = new ElementsPanel(); elements.Build(contentArea); });
+            SafeBuild("Logros", () => { achievements = new AchievementsPanel(); achievements.Build(contentArea); });
+            SafeBuild("Gran Obra", () => { prestige = new PrestigePanel(this); prestige.Build(contentArea); });
+            SafeBuild("Ajustes", () => { settings = new SettingsPanel(); settings.Build(contentArea); });
 
             BuildNav();
             BuildBuffPill();
@@ -349,12 +349,12 @@ namespace Athanor.UI
             var nav = Ui.Panel("Nav", root, UiTheme.Panel);
             Ui.Anchor(nav.rectTransform, new Vector2(0.5f, 0f), new Vector2(0, 0), new Vector2(1040, NavH - 10));
 
-            RegisterTab(nav.transform, "lab", lab.Root);
-            RegisterTab(nav.transform, "ayudantes", generators.Root);
-            RegisterTab(nav.transform, "elementos", elements.Root);
-            RegisterTab(nav.transform, "logros", achievements.Root);
-            RegisterTab(nav.transform, "obra", prestige.Root);
-            RegisterTab(nav.transform, "ajustes", settings.Root);
+            if (lab != null) RegisterTab(nav.transform, "lab", lab.Root);
+            if (generators != null) RegisterTab(nav.transform, "ayudantes", generators.Root);
+            if (elements != null) RegisterTab(nav.transform, "elementos", elements.Root);
+            if (achievements != null) RegisterTab(nav.transform, "logros", achievements.Root);
+            if (prestige != null) RegisterTab(nav.transform, "obra", prestige.Root);
+            if (settings != null) RegisterTab(nav.transform, "ajustes", settings.Root);
             LayoutTabs(nav.rectTransform);
         }
 
@@ -467,12 +467,12 @@ namespace Athanor.UI
                         Mathf.CeilToInt((float)s.BuffSecondsLeft) + "s";
             }
 
-            if (lab.Root.gameObject.activeSelf) lab.Refresh();
-            if (generators.Root.gameObject.activeSelf) generators.Refresh();
-            if (elements.Root.gameObject.activeSelf) elements.Refresh();
-            if (achievements.Root.gameObject.activeSelf) achievements.Refresh();
-            if (prestige.Root.gameObject.activeSelf) prestige.Refresh();
-            if (settings.Root.gameObject.activeSelf) settings.Refresh();
+            if (lab != null && lab.Root.gameObject.activeSelf) lab.Refresh();
+            if (generators != null && generators.Root.gameObject.activeSelf) generators.Refresh();
+            if (elements != null && elements.Root.gameObject.activeSelf) elements.Refresh();
+            if (achievements != null && achievements.Root.gameObject.activeSelf) achievements.Refresh();
+            if (prestige != null && prestige.Root.gameObject.activeSelf) prestige.Refresh();
+            if (settings != null && settings.Root.gameObject.activeSelf) settings.Refresh();
         }
     }
 }

@@ -41,6 +41,7 @@ namespace Athanor.EditorTools
                 MissionRules();
                 SaveRoundtrip();
                 EconomySanity();
+                AssetPipeline();
 
                 Debug.Log(failures == 0
                     ? "[SelfTest] TODO OK"
@@ -508,6 +509,32 @@ namespace Athanor.EditorTools
             Check(baseUnits < 200_000,
                   $"Piedra Filosofal alcanzable: {baseUnits} unidades base (límite 200K)");
             Debug.Log($"[SelfTest] 1 Piedra Filosofal = {baseUnits} unidades base");
+        }
+
+        /// Los assets del build: existen todos y el matraz es legible (alphaHitTest).
+        /// Regresión del bug v1.4-v1.9: textura no legible lanzaba y mataba la UI en device.
+        static void AssetPipeline()
+        {
+            AssetBaker.ConfigureImporters();
+
+            foreach (var e in ElementCatalog.Elements)
+            {
+                string p = $"Assets/Resources/Art/Elements/el_{e.Id.ToString().ToLowerInvariant()}.png";
+                Check(System.IO.File.Exists(p), "asset existe: " + p);
+            }
+            string[] core =
+            {
+                "Assets/Resources/Art/Core/matraz_vidrio.png",
+                "Assets/Resources/Art/Core/matraz_liquido.png",
+                "Assets/Resources/Art/Core/lab_fondo.png",
+                "Assets/Resources/Art/Achievements/medalla.png",
+                "Assets/Icon/app_icon.png",
+            };
+            foreach (var p in core)
+                Check(System.IO.File.Exists(p), "asset existe: " + p);
+
+            var glassImp = (TextureImporter)AssetImporter.GetAtPath("Assets/Resources/Art/Core/matraz_vidrio.png");
+            Check(glassImp != null && glassImp.isReadable, "matraz_vidrio legible (requerido por alphaHitTest)");
         }
 
         static double BaseUnitsFor(ElementId id)

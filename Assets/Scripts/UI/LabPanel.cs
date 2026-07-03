@@ -178,7 +178,11 @@ namespace Athanor.UI
             btn.targetGraphic = glass;
             btn.transition = Selectable.Transition.None;
             btn.onClick.AddListener(OnFlaskClicked);
-            glass.alphaHitTestMinimumThreshold = 0.05f; // solo cuenta el toque dentro de la silueta
+            // Solo cuenta el toque dentro de la silueta — PERO exige textura legible:
+            // con el PNG horneado no-legible esto LANZABA en el dispositivo y mataba
+            // toda la UI construida después (bug "faltan todos los menús", v1.4→v1.9).
+            if (glass.sprite != null && glass.sprite.texture != null && glass.sprite.texture.isReadable)
+                glass.alphaHitTestMinimumThreshold = 0.05f;
         }
 
         void BuildButtons()
