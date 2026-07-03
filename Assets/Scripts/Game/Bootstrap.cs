@@ -18,6 +18,9 @@ namespace Athanor.Game
             cam.clearFlags = CameraClearFlags.SolidColor;
             cam.backgroundColor = UiTheme.Background;
             cam.cullingMask = 0;
+            // Sin AudioListener NADA suena (lo detectó el smoke test de UI: el audio
+            // del juego llevaba mudo desde el día uno).
+            camGo.AddComponent<AudioListener>();
 
             // Input para uGUI
             var esGo = new GameObject("EventSystem");

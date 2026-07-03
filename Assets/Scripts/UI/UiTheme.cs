@@ -59,9 +59,10 @@ namespace Athanor.UI
                 for (int x = 0; x < size; x++)
                     tex.SetPixel(x, y, new Color(1, 1, 1, RoundedAlpha(x, y, size, size, radius)));
             tex.Apply();
+            // el borde 9-slice debe ser >= radio, o las esquinas se deforman al escalar
             roundedRect = Sprite.Create(tex, new Rect(0, 0, size, size),
                 new Vector2(0.5f, 0.5f), 100, 0, SpriteMeshType.FullRect,
-                new Vector4(24, 24, 24, 24));
+                new Vector4(28, 28, 28, 28));
             return roundedRect;
         }
 
