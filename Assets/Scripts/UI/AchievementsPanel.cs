@@ -43,22 +43,24 @@ namespace Athanor.UI
                 row.Bg = Ui.Panel("Ach_" + def.Id, content, UiTheme.Card);
                 Ui.Row(row.Bg.rectTransform, i, RowH);
 
-                row.Stripe = Ui.Panel("Stripe", row.Bg.transform, new Color(1, 1, 1, 0.06f), rounded: false);
+                // Medalla dentro de un chip tonal dorado (fila estilo Material)
+                row.Stripe = Ui.Panel("MedalChip", row.Bg.transform, new Color(1, 1, 1, 0.04f));
                 row.Stripe.raycastTarget = false;
-                Ui.Anchor(row.Stripe.rectTransform, new Vector2(0f, 0.5f), new Vector2(0, 0), new Vector2(10, RowH - 10));
+                Ui.Anchor(row.Stripe.rectTransform, new Vector2(0f, 0.5f), new Vector2(18, 0), new Vector2(84, 84));
 
-                row.Medal = Ui.Panel("Medal", row.Bg.transform, UiTheme.TextDim);
+                row.Medal = Ui.Panel("Medal", row.Stripe.transform, UiTheme.TextDim);
                 row.Medal.sprite = ProceduralIcons.Medal(out _);
                 row.Medal.type = Image.Type.Simple;
-                Ui.Anchor(row.Medal.rectTransform, new Vector2(0f, 0.5f), new Vector2(26, 0), new Vector2(68, 68));
+                row.Medal.raycastTarget = false;
+                Ui.Place(row.Medal.rectTransform, 0, 0, 58, 58);
 
-                row.Name = Ui.Label("Name", row.Bg.transform, def.Name, 36, UiTheme.TextMain,
+                row.Name = Ui.Label("Name", row.Bg.transform, def.Name, 34, UiTheme.TextMain,
                                     TextAnchor.MiddleLeft, FontStyle.Bold);
-                Ui.Anchor(row.Name.rectTransform, new Vector2(0f, 1f), new Vector2(120, -16), new Vector2(600, 46));
+                Ui.Anchor(row.Name.rectTransform, new Vector2(0f, 1f), new Vector2(122, -20), new Vector2(590, 44));
 
-                row.Desc = Ui.Label("Desc", row.Bg.transform, def.Desc, 28, UiTheme.TextDim,
+                row.Desc = Ui.Label("Desc", row.Bg.transform, def.Desc, 27, UiTheme.TextDim,
                                     TextAnchor.MiddleLeft);
-                Ui.Anchor(row.Desc.rectTransform, new Vector2(0f, 1f), new Vector2(120, -66), new Vector2(640, 40));
+                Ui.Anchor(row.Desc.rectTransform, new Vector2(0f, 1f), new Vector2(122, -68), new Vector2(630, 40));
 
                 row.Bonus = Ui.Label("Bonus", row.Bg.transform, "+" + Mathf.RoundToInt((float)(def.Bonus * 100)) + "%",
                                      38, UiTheme.Green, TextAnchor.MiddleRight, FontStyle.Bold);
@@ -84,7 +86,7 @@ namespace Athanor.UI
                 row.Name.color = unlocked ? UiTheme.TextMain : UiTheme.TextDim;
                 row.Bonus.color = unlocked ? UiTheme.Green : new Color(1, 1, 1, 0.18f);
                 row.Bg.color = unlocked ? UiTheme.Card : new Color(UiTheme.Card.r, UiTheme.Card.g, UiTheme.Card.b, 0.55f);
-                row.Stripe.color = unlocked ? UiTheme.Gold : new Color(1, 1, 1, 0.06f);
+                row.Stripe.color = unlocked ? UiTheme.Tint(UiTheme.Gold, 0.18f) : new Color(1, 1, 1, 0.04f);
             }
         }
     }

@@ -22,6 +22,9 @@ namespace Athanor.UI
             return c;
         }
 
+        /// Variante translúcida de un color (chips tonales estilo Material You).
+        public static Color Tint(Color c, float alpha) => new Color(c.r, c.g, c.b, alpha);
+
         public static Font DefaultFont =>
             Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
 
@@ -50,7 +53,7 @@ namespace Athanor.UI
         public static Sprite RoundedRect()
         {
             if (roundedRect != null) return roundedRect;
-            const int size = 64, radius = 20;
+            const int size = 64, radius = 26; // esquinas más suaves (rediseño v2.0)
             var tex = NewTex(size, size);
             for (int y = 0; y < size; y++)
                 for (int x = 0; x < size; x++)

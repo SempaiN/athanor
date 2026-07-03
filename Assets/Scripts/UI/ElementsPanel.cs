@@ -18,7 +18,7 @@ namespace Athanor.UI
         sealed class Row
         {
             public Recipe Recipe;
-            public Image OutDot;
+            public Image OutDot, Chip;
             public Text Title, Detail, OwnedText;
             public Button CombineBtn, SellBtn;
             public Text CombineLabel, SellLabel;
@@ -60,30 +60,37 @@ namespace Athanor.UI
                 var bg = Ui.Panel("Recipe_" + recipe.Output, content, UiTheme.Card);
                 Ui.Row(bg.rectTransform, i, RowH);
 
-                row.OutDot = Ui.Panel("Dot", bg.transform, UiTheme.TextDim);
+                // Icon-chip tonal con el color del elemento resultado
+                var outColor = UiTheme.ElementColor(ElementCatalog.Get(recipe.Output).ColorHex);
+                row.Chip = Ui.Panel("Chip", bg.transform, UiTheme.Tint(outColor, 0.15f));
+                row.Chip.raycastTarget = false;
+                Ui.Anchor(row.Chip.rectTransform, new Vector2(0f, 1f), new Vector2(16, -14), new Vector2(76, 76));
+
+                row.OutDot = Ui.Panel("Dot", row.Chip.transform, UiTheme.TextDim);
                 row.OutDot.sprite = ProceduralIcons.For(recipe.Output);
                 row.OutDot.type = Image.Type.Simple;
-                Ui.Anchor(row.OutDot.rectTransform, new Vector2(0f, 1f), new Vector2(22, -16), new Vector2(56, 56));
+                row.OutDot.raycastTarget = false;
+                Ui.Place(row.OutDot.rectTransform, 0, 0, 52, 52);
 
-                // Chip de tier (T1..T5) con color propio
+                // Chip de tier (T1..T5) con color propio, bajo el icon-chip
                 int tier = ElementCatalog.Get(recipe.Output).Tier;
-                var chip = Ui.Panel("Chip", bg.transform, TierColor(tier));
-                chip.raycastTarget = false;
-                Ui.Anchor(chip.rectTransform, new Vector2(0f, 1f), new Vector2(22, -84), new Vector2(56, 36));
-                var chipText = Ui.Label("T", chip.transform, "T" + tier, 24, UiTheme.Background,
+                var tierChip = Ui.Panel("TierChip", bg.transform, TierColor(tier));
+                tierChip.raycastTarget = false;
+                Ui.Anchor(tierChip.rectTransform, new Vector2(0f, 1f), new Vector2(24, -104), new Vector2(60, 36));
+                var chipText = Ui.Label("T", tierChip.transform, "T" + tier, 24, UiTheme.Background,
                                         TextAnchor.MiddleCenter, FontStyle.Bold);
                 Ui.Fill(chipText.rectTransform);
 
-                row.Title = Ui.Label("Title", bg.transform, "", 40, UiTheme.TextMain,
+                row.Title = Ui.Label("Title", bg.transform, "", 38, UiTheme.TextMain,
                                      TextAnchor.MiddleLeft, FontStyle.Bold);
-                Ui.Anchor(row.Title.rectTransform, new Vector2(0f, 1f), new Vector2(90, -18), new Vector2(480, 52));
+                Ui.Anchor(row.Title.rectTransform, new Vector2(0f, 1f), new Vector2(108, -18), new Vector2(460, 50));
 
-                row.OwnedText = Ui.Label("Owned", bg.transform, "", 34, UiTheme.Amber,
+                row.OwnedText = Ui.Label("Owned", bg.transform, "", 32, UiTheme.Amber,
                                          TextAnchor.MiddleLeft, FontStyle.Bold);
-                Ui.Anchor(row.OwnedText.rectTransform, new Vector2(0f, 1f), new Vector2(90, -68), new Vector2(480, 44));
+                Ui.Anchor(row.OwnedText.rectTransform, new Vector2(0f, 1f), new Vector2(108, -66), new Vector2(460, 42));
 
-                row.Detail = Ui.Label("Detail", bg.transform, "", 28, UiTheme.TextDim, TextAnchor.UpperLeft);
-                Ui.Anchor(row.Detail.rectTransform, new Vector2(0f, 1f), new Vector2(90, -116), new Vector2(560, 66));
+                row.Detail = Ui.Label("Detail", bg.transform, "", 27, UiTheme.TextDim, TextAnchor.UpperLeft);
+                Ui.Anchor(row.Detail.rectTransform, new Vector2(0f, 1f), new Vector2(108, -114), new Vector2(540, 66));
 
                 row.CombineBtn = Ui.TextButton("Combine", bg.transform, UiTheme.Green, out row.CombineLabel);
                 row.CombineLabel.fontSize = 30;
@@ -119,6 +126,7 @@ namespace Athanor.UI
                 {
                     row.OutDot.sprite = UiTheme.Circle(); // sin spoilers de la silueta
                     row.OutDot.color = new Color(1, 1, 1, 0.08f);
+                    row.Chip.color = new Color(1, 1, 1, 0.04f);
                     row.Title.text = Loc.T("ui_desconocido");
                     row.OwnedText.text = "";
                     row.Detail.text = "";
@@ -144,6 +152,7 @@ namespace Athanor.UI
                 {
                     row.OutDot.sprite = UiTheme.Circle(); // sin spoilers de la silueta
                     row.OutDot.color = new Color(1, 1, 1, 0.15f);
+                    row.Chip.color = new Color(1, 1, 1, 0.06f);
                     row.Title.text = "?";
                     row.OwnedText.text = Loc.T("ui_receta_oculta");
                     row.OwnedText.color = UiTheme.TextDim;
@@ -154,6 +163,7 @@ namespace Athanor.UI
                 double owned = s.BalanceOf(r.Output);
                 row.OutDot.sprite = ProceduralIcons.For(r.Output);
                 row.OutDot.color = ProceduralIcons.TintFor(r.Output, UiTheme.ElementColor(outDef.ColorHex));
+                row.Chip.color = UiTheme.Tint(UiTheme.ElementColor(outDef.ColorHex), 0.15f);
                 row.Title.text = Loc.T(outDef.NameKey);
                 row.OwnedText.color = UiTheme.Amber;
                 row.OwnedText.text = "x" + NumberFormat.Fmt(owned) +

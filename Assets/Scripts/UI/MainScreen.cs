@@ -321,23 +321,32 @@ namespace Athanor.UI
                                       UiTheme.TextDim);
             Ui.Anchor(essenceCaption.rectTransform, new Vector2(0.5f, 1f), new Vector2(0, -136), new Vector2(1000, 38));
 
-            // Fila 3: 4 columnas de elementos (icono arriba, cantidad debajo)
+            // Fila 3: 4 chips tonales [icono | cantidad] (patrón Material You)
             float slot = 1040f / BaseElements.Length;
             for (int i = 0; i < BaseElements.Length; i++)
             {
                 var el = BaseElements[i];
                 var def = ElementCatalog.Get(el);
+                var elColor = UiTheme.ElementColor(def.ColorHex);
                 float cx = -520 + slot * (i + 0.5f);
 
-                var dot = Ui.Panel("Dot_" + el, bar.transform,
-                    ProceduralIcons.TintFor(el, UiTheme.ElementColor(def.ColorHex)));
+                var chip = Ui.Panel("Chip_" + el, bar.transform, UiTheme.Tint(elColor, 0.13f));
+                Ui.Anchor(chip.rectTransform, new Vector2(0.5f, 0f), new Vector2(cx, 28), new Vector2(slot - 20, 84));
+
+                var dot = Ui.Panel("Dot_" + el, chip.transform,
+                    ProceduralIcons.TintFor(el, elColor));
                 dot.sprite = ProceduralIcons.For(el);
                 dot.type = Image.Type.Simple;
-                Ui.Anchor(dot.rectTransform, new Vector2(0.5f, 0f), new Vector2(cx, 88), new Vector2(46, 46));
+                dot.raycastTarget = false;
+                Ui.Anchor(dot.rectTransform, new Vector2(0f, 0.5f), new Vector2(16, 0), new Vector2(42, 42));
 
-                var counter = Ui.Label("Count_" + el, bar.transform, "0", 36, UiTheme.TextMain,
-                                       TextAnchor.MiddleCenter);
-                Ui.Anchor(counter.rectTransform, new Vector2(0.5f, 0f), new Vector2(cx, 40), new Vector2(slot - 12, 42));
+                var counter = Ui.Label("Count_" + el, chip.transform, "0", 32, UiTheme.TextMain,
+                                       TextAnchor.MiddleCenter, FontStyle.Bold);
+                var crt = counter.rectTransform;
+                crt.anchorMin = new Vector2(0, 0);
+                crt.anchorMax = new Vector2(1, 1);
+                crt.offsetMin = new Vector2(60, 0);
+                crt.offsetMax = new Vector2(-8, 0);
                 baseCounters[el] = counter;
             }
         }
@@ -346,8 +355,9 @@ namespace Athanor.UI
 
         void BuildNav()
         {
+            // Dock flotante (patrón de navegación moderno)
             var nav = Ui.Panel("Nav", root, UiTheme.Panel);
-            Ui.Anchor(nav.rectTransform, new Vector2(0.5f, 0f), new Vector2(0, 0), new Vector2(1040, NavH - 10));
+            Ui.Anchor(nav.rectTransform, new Vector2(0.5f, 0f), new Vector2(0, 12), new Vector2(1044, NavH - 22));
 
             if (lab != null) RegisterTab(nav.transform, "lab", lab.Root);
             if (generators != null) RegisterTab(nav.transform, "ayudantes", generators.Root);
@@ -398,14 +408,14 @@ namespace Athanor.UI
 
         void LayoutTabs(RectTransform nav)
         {
-            float w = 1020f / tabs.Count;
+            float w = 1024f / tabs.Count;
             for (int i = 0; i < tabs.Count; i++)
             {
                 var rt = tabs[i].Bg.rectTransform;
                 rt.anchorMin = rt.anchorMax = new Vector2(0f, 0.5f);
                 rt.pivot = new Vector2(0f, 0.5f);
                 rt.anchoredPosition = new Vector2(10 + i * w, 0);
-                rt.sizeDelta = new Vector2(w - 8, NavH - 34);
+                rt.sizeDelta = new Vector2(w - 8, NavH - 44);
             }
         }
 
@@ -416,8 +426,9 @@ namespace Athanor.UI
                 bool active = t.Key == key;
                 bool wasActive = t.Panel.gameObject.activeSelf;
                 t.Panel.gameObject.SetActive(active);
-                t.Bg.color = active ? UiTheme.Amber : UiTheme.Card;
-                t.Label.color = active ? UiTheme.Background : UiTheme.TextMain;
+                // Píldora activa ámbar; inactivas fundidas con el dock
+                t.Bg.color = active ? UiTheme.Amber : new Color(0, 0, 0, 0.001f);
+                t.Label.color = active ? UiTheme.Background : UiTheme.TextDim;
                 t.Icon.color = active ? UiTheme.Background : t.IconColor;
 
                 if (active && !wasActive)
@@ -449,9 +460,10 @@ namespace Athanor.UI
             }
             lastEssenceShown = s.Essence;
 
+            // Jerarquía limpia: el número grande manda; debajo solo la tasa
             double eps = game.EssencePerSecond();
             essenceCaption.text = eps > 0
-                ? Loc.T("ui_esencia") + "  (+" + NumberFormat.Fmt(eps) + "/s en materiales)"
+                ? "+" + NumberFormat.Fmt(eps) + " " + Loc.T("ui_esencia") + "/s"
                 : Loc.T("ui_esencia");
 
             foreach (var kv in baseCounters)
