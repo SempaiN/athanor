@@ -161,6 +161,25 @@ namespace Athanor.EditorTools
             FindDeep(rootT, "Tab_lab")?.GetComponent<Button>()?.onClick.Invoke();
             var lab = FindDeep(rootT, "LabPanel");
             Check(lab != null && lab.gameObject.activeSelf, "vuelta al laboratorio");
+
+            // --- Flujo COMPLETO de prestigio (reporte del usuario: "no funciona") ---
+            var st = game.State;
+            st.Discovered.Add(Athanor.Domain.ElementId.PiedraFilosofal);
+            st.LifetimeEssence = Math.Max(st.LifetimeEssence, 2_000_000);
+            FindDeep(rootT, "Tab_obra")?.GetComponent<Button>()?.onClick.Invoke(); // abre y refresca
+
+            var pbtn = FindDeep(rootT, "Prestige")?.GetComponent<Button>();
+            Check(pbtn != null, "existe el botón de la Gran Obra");
+            Check(pbtn != null && pbtn.interactable, "prestigio habilitado con requisitos cumplidos");
+            int prestigesBefore = game.State.PrestigeCount;
+            pbtn?.onClick.Invoke(); // arma la confirmación
+            pbtn?.onClick.Invoke(); // confirma dentro de la ventana
+            Check(game.State.PrestigeCount == prestigesBefore + 1, "el prestigio se ejecuta con doble toque");
+            Check(game.State.Quintessence >= 1, "otorga Quintaesencia");
+            Check(game.State.Essence == 0 && game.State.GeneratorsOwned.Count == 0,
+                  "resetea esencia y generadores");
+            var labAfter = FindDeep(rootT, "LabPanel");
+            Check(labAfter != null && labAfter.gameObject.activeSelf, "tras prestigiar vuelve al laboratorio");
         }
     }
 }

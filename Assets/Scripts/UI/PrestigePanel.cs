@@ -110,9 +110,17 @@ namespace Athanor.UI
             gainText.text = "+" + NumberFormat.Fmt(gain) + " " + Loc.T("ui_quintaesencia");
 
             prestigeBtn.interactable = game.CanPrestige;
-            prestigeLabel.text = confirming
-                ? Loc.T("ui_prestigio_confirmar")
-                : Loc.T("ui_prestigio_boton");
+            // El botón deshabilitado debe explicar POR QUÉ (reporte: "no funciona el prestigio")
+            if (!game.CanPrestige)
+                prestigeLabel.text = !hasStone
+                    ? Loc.T("ui_prestigio_falta_piedra")
+                    : (s.LifetimeEssence < GameRules.PrestigeEssenceFloor
+                        ? Loc.T("ui_prestigio_falta_esencia")
+                        : Loc.T("ui_prestigio_falta_gain"));
+            else
+                prestigeLabel.text = confirming
+                    ? Loc.T("ui_prestigio_confirmar")
+                    : Loc.T("ui_prestigio_boton");
         }
     }
 }
